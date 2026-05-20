@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>淘宝天猫 · 放单运营管理系统 V2</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0d13;
+    --surface: #141722;
+    --surface-2: #1b1f2e;
+    --surface-3: #232840;
+    --border: #2a3050;
+    --accent: #ff6b35;
+    --accent-light: #ff8f65;
+    --accent-glow: rgba(255,107,53,0.12);
+    --green: #34d399;
+    --green-bg: rgba(52,211,153,0.10);
+    --red: #f87171;
+    --red-bg: rgba(248,113,113,0.10);
+    --yellow: #fbbf24;
+    --yellow-bg: rgba(251,191,36,0.10);
+    --blue: #60a5fa;
+    --blue-bg: rgba(96,165,250,0.10);
+    --purple: #a78bfa;
+    --purple-bg: rgba(167,139,250,0.10);
+    --cyan: #22d3ee;
+    --cyan-bg: rgba(34,211,238,0.10);
+    --pink: #f472b6;
+    --pink-bg: rgba(244,114,182,0.10);
+    --text: #e8eaf0;
+    --text-2: #b0b5cc;
+    --text-3: #7a80a0;
+    --text-4: #4e5370;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Noto Sans SC', -apple-system, sans-serif;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;line-height:1.6}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 8% 15%,rgba(255,107,53,0.03) 0%,transparent 55%),radial-gradient(ellipse at 92% 85%,rgba(96,165,250,0.025) 0%,transparent 55%),radial-gradient(ellipse at 50% 50%,rgba(167,139,250,0.015) 0%,transparent 60%);pointer-events:none;z-index:0}
+
+  .app{position:relative;z-index:1;max-width:1440px;margin:0 auto;padding:28px 20px 60px}
+
+  /* ── Header ── */
+  .hdr{display:flex;align-items:center;gap:16px;margin-bottom:6px;animation:fd .5s ease both}
+  .hdr-logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#d44d1a);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 4px 20px rgba(255,107,53,0.25)}
+  .hdr h1{font-size:24px;font-weight:700;letter-spacing:-.3px;background:linear-gradient(135deg,#f0f0f5,var(--accent-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.35}
+  .hdr-sub{color:var(--text-3);font-size:13px;margin-bottom:24px;padding-left:62px;animation:fd .5s ease .08s both}
+  .hdr-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+
+  /* ── Buttons ── */
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);cursor:pointer;transition:all .15s;white-space:nowrap;font-family:var(--sans)}
+  .btn:hover{background:var(--surface-3);color:var(--text);border-color:var(--text-4)}
+  .btn-accent{background:var(--accent-glow);color:var(--accent);border-color:rgba(255,107,53,.25)}
+  .btn-accent:hover{background:rgba(255,107,53,.2);border-color:var(--accent)}
+  .btn-green{background:var(--green-bg);color:var(--green);border-color:rgba(52,211,153,.2)}
+  .btn-green:hover{background:rgba(52,211,153,.18);border-color:var(--green)}
+  .btn-red{background:var(--red-bg);color:var(--red);border-color:rgba(248,113,113,.2)}
+  .btn-red:hover{background:rgba(248,113,113,.18);border-color:var(--red)}
+  .btn-sm{padding:4px 10px;font-size:11px;border-radius:6px}
+  .btn-icon{width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:7px;font-size:14px}
+
+  /* ── Toolbar ── */
+  .toolbar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;animation:fi .3s ease both}
+  .search-box{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0 12px;flex:1;max-width:320px}
+  .search-box input{background:0;border:0;color:var(--text);font-size:12.5px;padding:8px 0;width:100%;outline:0;font-family:var(--sans)}
+  .search-box input::placeholder{color:var(--text-4)}
+  .search-box .s-ico{color:var(--text-4);font-size:13px;flex-shrink:0}
+
+  /* ── Toast ── */
+  .toast-container{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+  .toast{padding:10px 18px;border-radius:10px;font-size:12.5px;font-weight:500;animation:toast-in .3s ease;box-shadow:0 8px 30px rgba(0,0,0,.4);display:flex;align-items:center;gap:8px}
+  .toast-success{background:#1a2e1a;border:1px solid rgba(52,211,153,.3);color:var(--green)}
+  .toast-error{background:#2e1a1a;border:1px solid rgba(248,113,113,.3);color:var(--red)}
+  .toast-info{background:#1a1e2e;border:1px solid rgba(96,165,250,.3);color:var(--blue)}
+  @keyframes toast-in{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+
+  /* ── Modal ── */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+  .modal-overlay.show{display:flex}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);width:90%;max-width:600px;max-height:85vh;overflow:auto;animation:modal-in .25s ease}
+  .modal-h{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .modal-h h3{font-size:15px;font-weight:700}
+  .modal-b{padding:18px 22px}
+  .modal-f{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+  @keyframes modal-in{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+
+  /* ── Form in modal ── */
+  .form-row{margin-bottom:14px}
+  .form-row label{display:block;font-size:11.5px;color:var(--text-3);margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+  .form-input{width:100%;padding:8px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:var(--sans);outline:0;transition:border-color .15s}
+  .form-input:focus{border-color:var(--accent)}
+  .form-input::placeholder{color:var(--text-4)}
+  select.form-input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a80a0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+  select.form-input option{background:var(--surface-2);color:var(--text)}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+
+  /* ── Stats ── */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:24px}
+  .st{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;animation:fu .4s ease both}
+  .st:nth-child(2){animation-delay:.04s}.st:nth-child(3){animation-delay:.08s}.st:nth-child(4){animation-delay:.12s}.st:nth-child(5){animation-delay:.16s}.st:nth-child(6){animation-delay:.2s}
+  .st-i{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .st-l{font-size:11px;color:var(--text-4);font-weight:500}
+  .st-v{font-size:18px;font-weight:700;font-family:var(--mono);margin-top:1px}
+
+  /* ── Tabs ── */
+  .tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);margin-bottom:0;-ms-overflow-style:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{padding:11px 20px;font-size:13px;font-weight:500;color:var(--text-3);background:0;border:0;cursor:pointer;white-space:nowrap;position:relative;transition:all .2s;border-radius:var(--radius-sm) var(--radius-sm) 0 0;letter-spacing:.2px}
+  .tab:hover{color:var(--text-2);background:rgba(255,255,255,.02)}
+  .tab.on{color:var(--accent);background:var(--surface)}
+  .tab.on::after{content:'';position:absolute;bottom:-1px;left:14px;right:14px;height:2px;background:var(--accent);border-radius:2px 2px 0 0}
+  .tab b{display:inline-block;min-width:18px;height:16px;line-height:16px;text-align:center;font-size:9.5px;font-weight:700;border-radius:8px;margin-left:5px;padding:0 5px;vertical-align:middle}
+
+  /* ── Panel ── */
+  .pn{display:none;animation:fi .3s ease both;padding-top:20px}
+  .pn.on{display:block}
+
+  /* ── Card ── */
+  .cd{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:18px}
+  .cd-h{padding:16px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--surface-2);gap:10px;flex-wrap:wrap}
+  .cd-hl{display:flex;align-items:center;gap:10px;min-width:0}
+  .cd-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .cd-h h3{font-size:14.5px;font-weight:600;white-space:nowrap}
+  .cd-h .sub{font-size:11.5px;color:var(--text-4);font-weight:400}
+  .cd-hr{display:flex;gap:6px;align-items:center}
+  .cd-b{overflow-x:auto}
+
+  /* ── Table ── */
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  thead th{background:var(--surface-3);padding:10px 12px;text-align:left;font-weight:600;font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
+  tbody td{padding:9px 12px;border-bottom:1px solid rgba(42,48,80,.45);white-space:nowrap;color:var(--text-2);vertical-align:middle;min-width:60px;cursor:default;transition:background .1s}
+  tbody tr{transition:background .12s}
+  tbody tr:hover{background:rgba(255,107,53,.03)}
+  tbody tr:last-child td{border-bottom:none}
+  tbody td.editable{cursor:text;position:relative}
+  tbody td.editable:hover{background:rgba(255,107,53,.06)}
+  tbody td.editable:focus{outline:2px solid var(--accent);outline-offset:-2px;background:var(--surface-2);border-radius:2px}
+  .row-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s}
+  tbody tr:hover .row-actions{opacity:1}
+
+  /* ── Inline select ── */
+  td .inline-select{background:transparent;border:1px solid transparent;color:inherit;font:inherit;font-size:11.5px;padding:1px 4px;border-radius:4px;cursor:pointer;appearance:none;max-width:100%}
+  td .inline-select:hover{border-color:var(--border);background:var(--surface-2)}
+  td .inline-select:focus{border-color:var(--accent);outline:0}
+  td .inline-select option{background:var(--surface-2);color:var(--text)}
+
+  /* ── Badge ── */
+  .b{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:6px;font-size:11px;font-weight:500;white-space:nowrap}
+  .b-i{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+  .b-g{background:var(--green-bg);color:var(--green)}.b-g .b-i{background:var(--green)}
+  .b-y{background:var(--yellow-bg);color:var(--yellow)}.b-y .b-i{background:var(--yellow)}
+  .b-r{background:var(--red-bg);color:var(--red)}.b-r .b-i{background:var(--red)}
+  .b-b{background:var(--blue-bg);color:var(--blue)}.b-b .b-i{background:var(--blue)}
+  .b-p{background:var(--purple-bg);color:var(--purple)}.b-p .b-i{background:var(--purple)}
+  .b-c{background:var(--cyan-bg);color:var(--cyan)}.b-c .b-i{background:var(--cyan)}
+  .b-pk{background:var(--pink-bg);color:var(--pink)}.b-pk .b-i{background:var(--pink)}
+
+  /* ── Script blocks ── */
+  .sb{padding:18px 22px;border-bottom:1px solid rgba(42,48,80,.45);position:relative}
+  .sb:last-child{border-bottom:none}
+  .sb-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+  .stag{padding:3px 11px;border-radius:6px;font-size:10.5px;font-weight:600;white-space:nowrap}
+  .stag-1{background:var(--green-bg);color:var(--green)}
+  .stag-2{background:var(--yellow-bg);color:var(--yellow)}
+  .stag-3{background:var(--red-bg);color:var(--red)}
+  .stag-4{background:var(--blue-bg);color:var(--blue)}
+  .stag-5{background:var(--purple-bg);color:var(--purple)}
+  .stag-6{background:var(--cyan-bg);color:var(--cyan)}
+  .stag-7{background:var(--pink-bg);color:var(--pink)}
+  .sb-tle{font-size:13.5px;font-weight:600}
+  .sb-tm{font-size:11.5px;color:var(--text-4);margin-left:auto}
+  .sb-c{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-size:12.5px;line-height:1.85;color:var(--text-2);position:relative}
+  .sb-c strong{color:var(--text);font-weight:500}
+  .sb-c .hl{color:var(--accent-light);font-weight:600}
+  .sb-c .warn{color:var(--red);font-weight:600}
+  .sb-c .ok{color:var(--green);font-weight:600}
+  .copy-btn{position:absolute;top:10px;right:10px;padding:4px 10px;font-size:10.5px;border-radius:6px;background:var(--surface-3);border:1px solid var(--border);color:var(--text-3);cursor:pointer;transition:all .15s;font-family:var(--sans)}
+  .copy-btn:hover{background:var(--accent-glow);color:var(--accent);border-color:rgba(255,107,53,.3)}
+
+  /* ── Criteria grid ── */
+  .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ccol{padding:18px 22px}
+  .ccol:first-child{border-right:1px solid var(--border)}
+  .clbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+  .clbl.ok{color:var(--green)}.clbl.no{color:var(--red)}
+  .ci{display:flex;align-items:flex-start;gap:7px;padding:5px 0;font-size:12.5px;color:var(--text-2);line-height:1.5}
+  .ci-ico{flex-shrink:0;margin-top:2px;font-size:10px}
+
+  /* ── Checklist ── */
+  .ckg{padding:18px 22px}
+  .ck-tle{font-size:12.5px;font-weight:600;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .ck-tle .n{width:20px;height:20px;border-radius:6px;background:var(--accent-glow);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--accent);flex-shrink:0}
+  .ck{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:12.5px;color:var(--text-2);border-bottom:1px solid rgba(42,48,80,.25);cursor:pointer;user-select:none}
+  .ck:last-child{border-bottom:none}
+  .ck:hover .ckb{border-color:var(--accent)}
+  .ckb{width:17px;height:17px;border:2px solid var(--border);border-radius:5px;flex-shrink:0;transition:all .15s;display:flex;align-items:center;justify-content:center}
+  .ckb.on{border-color:var(--green);background:var(--green)}
+  .ckb.on::after{content:'✓';font-size:10px;color:#fff;font-weight:800}
+  .ck.on-text{color:var(--text-4);text-decoration:line-through}
+
+  /* ── Note ── */
+  .nt{padding:14px 22px;display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--text-4);line-height:1.6;background:rgba(255,107,53,.025)}
+  .nt-ico{flex-shrink:0;margin-top:1px;color:var(--accent)}
+
+  /* ── Keyword tag ── */
+  .kw{display:inline-block;padding:2px 10px;background:var(--accent-glow);color:var(--accent-light);border-radius:5px;font-size:11.5px;font-family:var(--mono);font-weight:500}
+
+  /* ── Price / mono ── */
+  .m{font-family:var(--mono);font-size:11.5px}
+  .m-g{font-family:var(--mono);font-size:11.5px;color:var(--green)}
+
+  /* ── Welfare ── */
+  .wf-step{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid rgba(42,48,80,.3)}
+  .wf-step:last-child{border-bottom:none}
+  .wf-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0;color:#fff}
+  .wf-body h4{font-size:13.5px;font-weight:600;margin-bottom:4px}
+  .wf-body p{font-size:12.5px;color:var(--text-2);line-height:1.7}
+  .wf-body .wf-tag{display:inline-block;padding:1px 8px;border-radius:4px;font-size:10.5px;font-weight:600;margin-right:4px}
+  .wf-body .wf-do{background:var(--green-bg);color:var(--green)}
+  .wf-body .wf-dont{background:var(--red-bg);color:var(--red)}
+  .wf-body .wf-tip{background:var(--yellow-bg);color:var(--yellow)}
+
+  .wf-banner{background:linear-gradient(135deg,rgba(255,107,53,.08),rgba(167,139,250,.06));border:1px dashed rgba(255,107,53,.3);border-radius:10px;padding:18px 22px;margin:18px 22px;display:flex;align-items:center;gap:14px}
+  .wf-banner-ico{font-size:28px;flex-shrink:0}
+  .wf-banner h4{font-size:14px;font-weight:700;color:var(--accent);margin-bottom:3px}
+  .wf-banner p{font-size:12px;color:var(--text-3);line-height:1.6}
+
+  .forbid-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;padding:18px 22px}
+  .forbid-item{display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--red-bg);border:1px solid rgba(248,113,113,.15);border-radius:8px;font-size:12px;color:var(--red)}
+
+  /* ── Empty state ── */
+  .empty-row td{text-align:center;color:var(--text-4);padding:30px 12px;font-style:italic;font-size:12px}
+
+  /* ── Animations ── */
+  @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fd{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ── Print ── */
+  @media print{
+    body::before{display:none}
+    .hdr-right,.toolbar,.btn,.copy-btn,.row-actions{display:none!important}
+    .cd{break-inside:avoid}
+    .pn{display:block!important;page-break-before:always}
+    .tabs{display:none}
+    .tab.on::after{display:none}
+    table{font-size:10px}
+    td,th{padding:4px 6px}
+  }
+
+  /* ── Cloud sync ── */
+  .sync-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;animation:fi .3s ease both;flex-wrap:wrap}
+  .sync-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .sync-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
+  .sync-dot.off{background:var(--text-4)}
+  .sync-dot.sync{background:var(--yellow);animation:sync-pulse 1s infinite}
+  .sync-dot.err{background:var(--red)}
+  @keyframes sync-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .sync-info{font-size:11.5px;color:var(--text-3);flex:1;min-width:0}
+  .sync-info strong{color:var(--text-2);font-weight:600}
+  .sync-actions{display:flex;gap:6px;align-items:center}
+
+  /* ── Responsive ── */
+  @media(max-width:900px){
+    .app{padding:16px 10px 40px}
+    .hdr h1{font-size:18px}
+    .hdr-sub{padding-left:0}
+    .hdr-right{margin-left:0;width:100%;justify-content:flex-end}
+    .tab{padding:9px 12px;font-size:12px}
+    .cgrid{grid-template-columns:1fr}
+    .ccol:first-child{border-right:0;border-bottom:1px solid var(--border)}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .sb-tm{display:none}
+    .forbid-grid{grid-template-columns:1fr}
+    .form-grid{grid-template-columns:1fr}
+    .toolbar{flex-direction:column;align-items:stretch}
+    .search-box{max-width:100%}
+    .sync-bar{flex-direction:column;align-items:flex-start}
+    .sync-actions{width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══ Header ═══ -->
+  <div class="hdr">
+    <div class="hdr-logo">放</div>
+    <div>
+      <h1>淘宝天猫 · 放单运营管理系统</h1>
+      <div class="hdr-sub">话术 · 登记 · 检查 · 催收 · 异常 · 关键词 · 福利任务 &mdash; 全模块整合 · 数据可编辑 · 云端永久存储</div>
+    </div>
+    <div class="hdr-right">
+      <button class="btn btn-sm" onclick="exportData()" title="导出JSON文件到本地">📥 导出</button>
+      <button class="btn btn-sm" onclick="document.getElementById('importFile').click()" title="从JSON文件恢复">📤 导入</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="btn btn-sm btn-red" onclick="clearAllData()" title="清除所有本地数据">🗑 重置</button>
+    </div>
+  </div>
+
+  <!-- ═══ Stats ═══ -->
+  <div class="stats" id="statsBar">
+    <!-- 动态生成 -->
+  </div>
+
+  <!-- ═══ Cloud Sync Bar ═══ -->
+  <div class="sync-bar" id="syncBar">
+    <span class="sync-dot off" id="syncDot"></span>
+    <span class="sync-info" id="syncInfo">☁️ 云端同步：未连接</span>
+    <div class="sync-actions">
+      <button class="btn btn-sm" id="btnPull" onclick="cloudPull()" disabled title="从云端拉取最新数据">⬇ 拉取</button>
+      <button class="btn btn-sm" id="btnPush" onclick="cloudPush()" disabled title="推送本地数据到云端">⬆ 推送</button>
+      <button class="btn btn-sm btn-accent" id="btnCloudSetup" onclick="showCloudSetup()">⚙ 云端设置</button>
+    </div>
+  </div>
+
+  <!-- ═══ Tabs ═══ -->
+  <div class="tabs" id="tabs">
+    <button class="tab on" onclick="go(0)">放单话术</button>
+    <button class="tab" onclick="go(1)">登记模板</button>
+    <button class="tab" onclick="go(2)">检查流程</button>
+    <button class="tab" onclick="go(3)">催收货流程</button>
+    <button class="tab" onclick="go(4)">异常处理</button>
+    <button class="tab" onclick="go(5)">关键词管理</button>
+    <button class="tab" onclick="go(6)">福利任务<b style="background:var(--accent-glow);color:var(--accent)">NEW</b></button>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════╗ -->
+  <!-- ║          PANEL 0 · 放单话术              ║ -->
+  <!-- ╚══════════════════════════════════════════╝ -->
+  <div class="pn on" id="p0">
+
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--accent)"></div><h3>淘宝C店放单话术</h3><span class="sub">· 邀约 → 说明 → 假聊 → 好评</span></div><span class="b b-b"><span class="b-i"></span>淘宝C店</span></div>
+      <div class="cd-b">
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-1">第一步</span><span class="sb-tle">首次邀约</span></div>
+          <div class="sb-c" data-script="c-invite">亲，您好！我们淘宝店正在做新品推广活动，需要真实买家帮我们做基础销量和评价。<strong>全程真实下单、真实物流</strong>，您收到商品满意后确认收货+好评，我们给您返佣。请问有兴趣吗？<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-2">第二步</span><span class="sb-tle">说明操作要求</span></div>
+          <div class="sb-c" data-script="c-steps">
+            操作步骤：<br>
+            1. 打开淘宝APP，搜索关键词：<span class="hl">「XXXXXX」</span><br>
+            2. 找到我们家的商品（店铺名：XXXXXX，主图是XX）<br>
+            3. <span class="warn">不要直接点链接</span>，必须从搜索结果页点进去<br>
+            4. 进入后先浏览主图视频看完 → 详情页滑到底 → 看评价（至少翻3页）→ 看问大家<br>
+            5. 浏览 <strong>≥3-5分钟</strong> 后，点击「客服」进行假聊<br>
+            6. 假聊至少3个来回后拍下付款<br>
+            7. 截图给我：订单详情页全屏截图<br>
+            8. 收到货后 <span class="hl">五星好评+15字以上+3张以上晒图</span><br><br>
+            佣金：<span class="hl">XX元</span>，确认收货好评后24小时内结算
+            <button class="copy-btn" onclick="copyScript(this)">复制</button>
+          </div>
+        </div>
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-3">第三步</span><span class="sb-tle">假聊参考话术</span></div>
+          <div class="sb-c" data-script="c-chat">
+            请用自己的话稍作修改，<span class="warn">不要完全复制</span>：<br><br>
+            · 亲，这款XX效果怎么样？之前没用过<br>
+            · 有没有什么优惠呀？可以便宜点吗？<br>
+            · 现在拍下多久能发货？我比较急<br>
+            · XX色/XX尺码还有货吗？<br>
+            · 好的，那我先拍一单试试
+            <button class="copy-btn" onclick="copyScript(this)">复制</button>
+          </div>
+        </div>
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-4">第四步</span><span class="sb-tle">好评参考话术</span></div>
+          <div class="sb-c" data-script="c-review">
+            ⭐⭐⭐⭐⭐<br><br>
+            收到货了，包装很仔细，打开没有破损。<strong>XX的手感比想象中好</strong>，颜色和图片一致没有色差。试了一下效果很满意，这个价格性价比很高了。客服态度也很好，问什么都及时回复。物流也快，两天就到了。会回购的，推荐给大家！<br><br>
+            晒图建议：第1张快递开箱图 · 第2张商品正面 · 第3张细节/使用效果图
+            <button class="copy-btn" onclick="copyScript(this)">复制</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--red)"></div><h3>天猫旗舰店放单话术</h3><span class="sub">· 体验官招募模式（垫付返款+佣金）</span></div><span class="b b-r"><span class="b-i"></span>天猫旗舰</span></div>
+      <div class="cd-b">
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-1">第一步</span><span class="sb-tle">首次邀约（体验官模式）</span></div>
+          <div class="sb-c" data-script="tm-invite">亲，您好！我们天猫旗舰店现在招募体验官，免费体验商品（<strong>需先垫付，收货好评后全额返款+佣金</strong>）。商品本身价值XX元，体验后给您返款XX元+佣金XX元，相当于免费拿商品还赚XX元。有兴趣了解一下吗？<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-2">第二步</span><span class="sb-tle">天猫专属操作要求</span></div>
+          <div class="sb-c" data-script="tm-steps">
+            1. 打开天猫APP或淘宝APP切换到天猫搜索<br>
+            2. 搜索关键词：<span class="hl">「XXXXXX」</span><br>
+            3. 筛选条件：选择「天猫」→ 按「销量/综合」排序<br>
+            4. 找到店铺（注意认准<span class="hl">天猫红色标识</span>）<br>
+            5. 浏览要求：≥3-5分钟，详情/评价/问大家<br>
+            6. 假聊后下单付款<br>
+            7. 确认收货后去「<span class="hl">天猫评价</span>」带图评价<br>
+            8. 如有「买家秀征集」活动，优先参与<br><br>
+            垫付金额：XX元 ｜ 返款金额：XX元（含本金+佣金）<br>
+            结算时间：确认收货好评后24小时内返款
+            <button class="copy-btn" onclick="copyScript(this)">复制</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════╗ -->
+  <!-- ║          PANEL 1 · 登记模板              ║ -->
+  <!-- ╚══════════════════════════════════════════╝ -->
+  <div class="pn" id="p1">
+
+    <div class="cd">
+      <div class="cd-h">
+        <div class="cd-hl"><div class="cd-dot" style="background:var(--accent)"></div><h3>接单人登记表</h3><span class="sub">· 点击单元格可编辑 · 悬停行显示操作按钮</span></div>
+        <div class="cd-hr">
+          <button class="btn btn-accent btn-sm" onclick="addRow('regTable')">+ 新增接单人</button>
+        </div>
+      </div>
+      <div class="cd-b">
+        <table id="regTable">
+          <thead><tr><th style="width:40px">#</th><th>接单人昵称</th><th>联系方式</th><th>账号等级</th><th>88VIP</th><th>芝麻信用</th><th>近30天同类目</th><th>所在城市</th><th>放单日期</th><th>商品名称</th><th>关键词</th><th>订单编号</th><th>拍下金额</th><th>佣金</th><th>快递单号</th><th>签收状态</th><th>确认收货</th><th>好评</th><th>佣金结算</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="nt"><span class="nt-ico">💡</span><span>状态列可点击切换：签收（未发货/运输中/已签收）· 确认收货（未确认/已确认）· 好评（未评价/已好评/已晒图）· 佣金（未结/已结/已拒付）· 点击单元格可直接编辑</span></div>
+    </div>
+
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--green)"></div><h3>接单人筛选标准</h3></div></div>
+      <div class="cd-b">
+        <div class="cgrid">
+          <div class="ccol">
+            <div class="clbl ok">✅ 优先接单</div>
+            <div class="ci"><span class="ci-ico" style="color:var(--green)">●</span> 淘宝账号注册时间 ≥ 1年</div>
+            <div class="ci"><span class="ci-ico" style="color:var(--green)">●</span> 买家信用等级 ≥ 3心</div>
+            <div class="ci"><span class="ci-ico" style="color:var(--green)">●</span> 近30天购买同类目 ≤ 3单</div>
+            <div class="ci"><span class="ci-ico" style="color:var(--green)">●</span> 有真实收货地址</div>
+            <div class="ci"><span class="ci-ico" style="color:var(--green)">●</span> 芝麻信用 ≥ 650分</div>
+            <div class="ci"><span class="ci-ico" style="color:var(--green)">●</span> 有88VIP标识优先（权重高）</div>
+            <div class="ci"><span class="ci-ico" style="color:var(--green)">●</span> 常用设备非模拟器/非多开</div>
+          </div>
+          <div class="ccol">
+            <div class="clbl no">❌ 拒绝接单</div>
+            <div class="ci"><span class="ci-ico" style="color:var(--red)">●</span> 新注册账号（＜3个月）</div>
+            <div class="ci"><span class="ci-ico" style="color:var(--red)">●</span> 近30天已被安排 ≥ 5单</div>
+            <div class="ci"><span class="ci-ico" style="color:var(--red)">●</span> 收货地址与其他接单人重复</div>
+            <div class="ci"><span class="ci-ico" style="color:var(--red)">●</span> 使用WiFi下单</div>
+            <div class="ci"><span class="ci-ico" style="color:var(--red)">●</span> 历史有恶意退款/投诉记录</div>
+            <div class="ci"><span class="ci-ico" style="color:var(--red)">●</span> 同一IP/设备操作多账号</div>
+            <div class="ci"><span class="ci-ico" style="color:var(--red)">●</span> 虚拟/批量地址（学校/写字楼）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--blue)"></div><h3>放单前设置 Checklist</h3></div></div>
+      <div class="cd-b">
+        <div class="ckg" id="preChecklist">
+          <div class="ck-tle"><span class="n">1</span> 店铺端设置</div>
+          <div class="ck" onclick="toggle(this)" data-key="pre-1"><div class="ckb"></div>商品链接确认无误，SKU价格正确</div>
+          <div class="ck" onclick="toggle(this)" data-key="pre-2"><div class="ckb"></div>关键词已规划好（3-5个轮换词）</div>
+          <div class="ck" onclick="toggle(this)" data-key="pre-3"><div class="ckb"></div>目标SKU库存充足，防止超卖</div>
+          <div class="ck" onclick="toggle(this)" data-key="pre-4"><div class="ckb"></div>优惠券/满减已设置（如有）</div>
+          <div class="ck" onclick="toggle(this)" data-key="pre-5"><div class="ckb"></div>客服话术已同步，统一应答口径</div>
+          <div class="ck" onclick="toggle(this)" data-key="pre-6"><div class="ckb"></div>淘宝客推广已暂时关闭</div>
+          <div class="ck" onclick="toggle(this)" data-key="pre-7"><div class="ckb"></div>佣金标准已明确并告知接单人</div>
+          <div class="ck" onclick="toggle(this)" data-key="pre-8"><div class="ckb"></div>发货方式已确认（真实发货/礼品单）</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════╗ -->
+  <!-- ║          PANEL 2 · 检查流程              ║ -->
+  <!-- ╚══════════════════════════════════════════╝ -->
+  <div class="pn" id="p2">
+
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--green)"></div><h3>下单前检查</h3><span class="sub">· 确保账号和环境合格</span></div><span class="b b-g"><span class="b-i"></span>Phase 1</span></div>
+      <div class="cd-b">
+        <table>
+          <thead><tr><th>检查项</th><th>检查方式</th><th>合格标准</th><th>不合格处理</th><th>结果</th></tr></thead>
+          <tbody>
+            <tr><td><strong>账号近期购买记录</strong></td><td>截图「我的订单」近30天</td><td>同类目购买 ≤ 3单</td><td>要求更换账号</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="chk-pre-1"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
+            <tr><td><strong>设备 & 网络环境</strong></td><td>确认手机型号+网络类型</td><td>4G/5G移动数据，非WiFi</td><td>要求切换网络</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="chk-pre-2"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
+            <tr><td><strong>收货地址</strong></td><td>提供完整地址</td><td>真实地址，不与其他接单人重复</td><td>要求更换地址</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="chk-pre-3"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
+            <tr><td><strong>关键词确认</strong></td><td>发放前核对</td><td>关键词正确，可搜到目标商品</td><td>更换关键词</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="chk-pre-4"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--yellow)"></div><h3>下单后检查</h3><span class="sub">· 截图凭证核验</span></div><span class="b b-y"><span class="b-i"></span>Phase 2</span></div>
+      <div class="cd-b">
+        <table>
+          <thead><tr><th>必交截图</th><th>截图内容要求</th><th>关键验证点</th><th>不合格处理</th><th>结果</th></tr></thead>
+          <tbody>
+            <tr><td><strong>① 搜索结果页</strong></td><td>包含搜索关键词+目标商品位置</td><td>确认通过关键词搜索进入</td><td>要求重新操作</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="chk-post-1"><option value="pending">待提交</option><option value="pass">✅ 已交</option><option value="fail">❌ 不合格</option></select></td></tr>
+            <tr><td><strong>② 商品详情页</strong></td><td>包含主图、价格、SKU</td><td>SKU和金额与指定一致</td><td>退款重拍</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="chk-post-2"><option value="pending">待提交</option><option value="pass">✅ 已交</option><option value="fail">❌ 不合格</option></select></td></tr>
+            <tr><td><strong>③ 假聊记录</strong></td><td>至少3个来回对话</td><td>对话自然非模板化</td><td>补充假聊</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="chk-post-3"><option value="pending">待提交</option><option value="pass">✅ 已交</option><option value="fail">❌ 不合格</option></select></td></tr>
+            <tr><td><strong>④ 订单详情页</strong></td><td>订单编号、实付金额、下单时间、地址</td><td>金额正确、地址真实</td><td>核实修改</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="chk-post-4"><option value="pending">待提交</option><option value="pass">✅ 已交</option><option value="fail">❌ 不合格</option></select></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--accent)"></div><h3>发货 & 签收后检查</h3><span class="sub">· 物流跟踪 + 评价确认</span></div><span class="b b-r"><span class="b-i"></span>Phase 3</span></div>
+      <div class="cd-b">
+        <table>
+          <thead><tr><th>阶段</th><th>检查项</th><th>时间节点</th><th>操作</th><th>结果</th></tr></thead>
+          <tbody>
+            <tr><td rowspan="2"><strong>发货后</strong></td><td>物流单号真实有效</td><td>下单后 24-48h</td><td>快递100查询</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="chk-ship-1"><option value="pending">待检查</option><option value="pass">✅ 正常</option><option value="fail">❌ 异常</option></select></td></tr>
+            <tr><td>物流轨迹正常更新</td><td>发货后 1-3天</td><td>每天检查一次</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="chk-ship-2"><option value="pending">待检查</option><option value="pass">✅ 正常</option><option value="fail">❌ 异常</option></select></td></tr>
+            <tr><td rowspan="4"><strong>签收后</strong></td><td>物流显示已签收</td><td>预计到达日</td><td>截图留证+通知接单人</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="chk-recv-1"><option value="pending">待检查</option><option value="pass">✅ 已签</option><option value="fail">❌ 未签</option></select></td></tr>
+            <tr><td>确认收货</td><td>签收后 1-5天</td><td>按催收流程跟进</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="chk-recv-2"><option value="pending">待确认</option><option value="pass">✅ 已确认</option><option value="fail">❌ 未确认</option></select></td></tr>
+            <tr><td>好评+晒图</td><td>确认收货后</td><td>检查评价是否显示</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="chk-recv-3"><option value="pending">待好评</option><option value="pass">✅ 已好评</option><option value="fail">❌ 未评</option></select></td></tr>
+            <tr><td>佣金结算</td><td>好评后 24h内</td><td>转账+登记</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="chk-recv-4"><option value="pending">待结算</option><option value="pass">✅ 已结</option><option value="fail">❌ 拒付</option></select></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="nt"><span class="nt-ico">⚠️</span><span>评价检查重点：文字 ≥ 15字 · 晒图 ≥ 3张 · 评价是否被系统过滤 · 天猫需在天猫评价入口评价</span></div>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════╗ -->
+  <!-- ║          PANEL 3 · 催收货流程            ║ -->
+  <!-- ╚══════════════════════════════════════════╝ -->
+  <div class="pn" id="p3">
+
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--blue)"></div><h3>催确认收货话术（分阶段）</h3><span class="sub">· 签收后 1天 → 2天 → 3天 → 5天 → 7天</span></div></div>
+      <div class="cd-b">
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-1">签收 +1天</span><span class="sb-tle">温馨提醒</span><span class="sb-tm">最佳时段 10-12点 / 19-21点</span></div>
+          <div class="sb-c" data-script="urge-1">亲，物流显示商品已经签收啦~ 您看看商品有没有什么问题呀？如果满意的话帮忙<strong>确认收货+好评</strong>哦，我们好给您结算佣金。有任何问题都可以找我哈！<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-2">签收 +2天</span><span class="sb-tle">二次跟进</span><span class="sb-tm">间隔 ≥ 24小时</span></div>
+          <div class="sb-c" data-script="urge-2">亲，不好意思又打扰您了~ 之前那单商品您用着怎么样呀？方便的话帮忙确认收货+给个好评嘛，谢谢您啦！<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-3">签收 +3天</span><span class="sb-tle">明确催促</span></div>
+          <div class="sb-c" data-script="urge-3">亲，您好~ 这单已经签收3天了呢，麻烦帮忙操作一下确认收货哦。确认收货好评后我<strong>第一时间给您结算佣金XX元</strong>。操作路径：淘宝→我的订单→找到这笔订单→确认收货→去评价，很简单的~<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-4">签收 +5天</span><span class="sb-tle">最后通牒</span></div>
+          <div class="sb-c" data-script="urge-4">亲，您好。这单已经签收5天了，按照平台规则，如果超时未确认<strong>系统将在第10-15天自动确认收货</strong>。但这样佣金结算会推迟，建议您现在确认一下，确认后我马上给您结佣。麻烦了！<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-5">签收 +7天</span><span class="sb-tle">异常处理</span></div>
+          <div class="sb-c" data-script="urge-5">亲，您好。多次联系您未收到回复，如果商品有质量问题或不满意，请及时联系我处理（可申请退货退款）。如果商品没问题但一直不确认收货也不评价，<strong>按照合作约定佣金将无法结算</strong>。请在XX日前回复我，谢谢。<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--yellow)"></div><h3>催单注意事项</h3></div></div>
+      <div class="cd-b">
+        <table>
+          <thead><tr><th>规则项</th><th>标准</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><strong>催单频率</strong></td><td class="m">每天最多1次</td><td>间隔 ≥ 24h，连续不超过5天</td></tr>
+            <tr><td><strong>最佳时段</strong></td><td class="m">10-12 / 19-21点</td><td>避免早8前、晚22后、午休</td></tr>
+            <tr><td><strong>留证要求</strong></td><td>每次催单截图保存</td><td>含时间戳，作异常处理依据</td></tr>
+            <tr><td><strong>语气要求</strong></td><td>始终友好，不威胁</td><td>禁止威胁差评、辱骂等</td></tr>
+            <tr><td><strong>保密要求</strong></td><td>不得透露放单性质</td><td>避免被举报导致店铺风险</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════╗ -->
+  <!-- ║          PANEL 4 · 异常处理              ║ -->
+  <!-- ╚══════════════════════════════════════════╝ -->
+  <div class="pn" id="p4">
+
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--red)"></div><h3>异常情况处理预案</h3><span class="sub">· 7种常见异常及应对</span></div></div>
+      <div class="cd-b">
+        <table>
+          <thead><tr><th>异常类型</th><th>紧急度</th><th>处理方案</th><th>责任人</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td><strong>接单人下单后退款</strong></td><td><span class="b b-r"><span class="b-i"></span>紧急</span></td><td>拦截快递 → 联系买家 → 协商取消退款 → 拒绝则拉黑记录</td><td>放单负责人</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="exc-1"><option value="pending">待处理</option><option value="done">✅ 已处理</option><option value="skip">⏭ 跳过</option></select></td></tr>
+            <tr><td><strong>收到差评</strong></td><td><span class="b b-r"><span class="b-i"></span>紧急</span></td><td>立即联系 → 了解原因 → 协商修改 → 适当补偿</td><td>放单+客服</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="exc-2"><option value="pending">待处理</option><option value="done">✅ 已处理</option><option value="skip">⏭ 跳过</option></select></td></tr>
+            <tr><td><strong>物流异常（停滞/丢件）</strong></td><td><span class="b b-y"><span class="b-i"></span>中等</span></td><td>联系快递 → 补发 → 通知接单人延迟</td><td>仓储/发货</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="exc-3"><option value="pending">待处理</option><option value="done">✅ 已处理</option><option value="skip">⏭ 跳过</option></select></td></tr>
+            <tr><td><strong>接单人失联</strong></td><td><span class="b b-y"><span class="b-i"></span>中等</span></td><td>等待3天 → 最后通牒 → 标记异常 → 拒付佣金</td><td>放单负责人</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="exc-4"><option value="pending">待处理</option><option value="done">✅ 已处理</option><option value="skip">⏭ 跳过</option></select></td></tr>
+            <tr><td><strong>评价不显示</strong></td><td><span class="b b-b"><span class="b-i"></span>一般</span></td><td>检查是否被系统过滤 → 建议追评或补充晒图</td><td>放单负责人</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="exc-5"><option value="pending">待处理</option><option value="done">✅ 已处理</option><option value="skip">⏭ 跳过</option></select></td></tr>
+            <tr><td><strong>商品/账号被降权</strong></td><td><span class="b b-r"><span class="b-i"></span>紧急</span></td><td>立即停止放单 → 排查原因 → 调整策略 → 降频率</td><td>运营负责人</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="exc-6"><option value="pending">待处理</option><option value="done">✅ 已处理</option><option value="skip">⏭ 跳过</option></select></td></tr>
+            <tr><td><strong>同行恶意举报</strong></td><td><span class="b b-r"><span class="b-i"></span>紧急</span></td><td>保留所有记录凭证 → 联系淘宝客服申诉</td><td>运营负责人</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="exc-7"><option value="pending">待处理</option><option value="done">✅ 已处理</option><option value="skip">⏭ 跳过</option></select></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="cd">
+      <div class="cd-h">
+        <div class="cd-hl"><div class="cd-dot" style="background:var(--purple)"></div><h3>异常登记表</h3><span class="sub">· 逐单记录异常详情</span></div>
+        <div class="cd-hr">
+          <button class="btn btn-accent btn-sm" onclick="addRow('excTable')">+ 新增记录</button>
+        </div>
+      </div>
+      <div class="cd-b">
+        <table id="excTable">
+          <thead><tr><th style="width:40px">#</th><th>日期</th><th>订单编号</th><th>接单人</th><th>异常类型</th><th>详情</th><th>处理方式</th><th>处理结果</th><th>处理人</th><th style="width:50px">操作</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════╗ -->
+  <!-- ║          PANEL 5 · 关键词管理            ║ -->
+  <!-- ╚══════════════════════════════════════════╝ -->
+  <div class="pn" id="p5">
+
+    <div class="cd">
+      <div class="cd-h">
+        <div class="cd-hl"><div class="cd-dot" style="background:var(--accent)"></div><h3>关键词轮换管理表</h3><span class="sub">· 控制每个关键词的使用频率和间隔</span></div>
+        <div class="cd-hr">
+          <button class="btn btn-accent btn-sm" onclick="addRow('kwTable')">+ 新增关键词</button>
+        </div>
+      </div>
+      <div class="cd-b">
+        <table id="kwTable">
+          <thead><tr><th style="width:40px">#</th><th>关键词</th><th>搜索人气</th><th>竞争度</th><th>已用次数</th><th>最近使用</th><th>间隔天数</th><th>下次可用</th><th>日上限</th><th>状态</th><th style="width:50px">操作</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="nt"><span class="nt-ico">💡</span><span>使用规则：每个关键词每天 ≤ 3-5单 · 同一关键词间隔 ≥ 3天 · 每周统计效果淘汰低效词、补充新词</span></div>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════════════╗ -->
+  <!-- ║          PANEL 6 · 福利任务                      ║ -->
+  <!-- ╚══════════════════════════════════════════════════╝ -->
+  <div class="pn" id="p6">
+
+    <div class="cd" style="overflow:visible">
+      <div class="wf-banner">
+        <div class="wf-banner-ico">🎁</div>
+        <div>
+          <h4>福利任务模块</h4>
+          <p>适用于群内福利放单场景：加购收藏→关注店铺→购物车下单→好评晒单，12天接单间隔管理，禁止信用卡/花呗分期</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--accent)"></div><h3>福利任务 · 群内发布话术</h3><span class="sub">· 完整模板直接复制发送</span></div><span class="b b-pk"><span class="b-i"></span>群内公告</span></div>
+      <div class="cd-b">
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-3">重要</span><span class="sb-tle">禁止事项（置顶醒目）</span></div>
+          <div class="sb-c" data-script="wf-forbid">
+            <span class="warn">🚫 禁止使用信用卡、花呗分期付款！</span><br>
+            必须使用【余额 / 储蓄卡 / 余额宝】支付
+            <button class="copy-btn" onclick="copyScript(this)">复制</button>
+          </div>
+        </div>
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-1">模板</span><span class="sb-tle">标准群内公告</span></div>
+          <div class="sb-c" data-script="wf-announce" style="font-family:var(--mono);font-size:12px;white-space:pre-wrap;line-height:1.9">🔥🔥🔥 【福利任务 · 第XX期】🔥🔥🔥
+
+⏰ 发布时间：2025年X月X日 XX:XX
+📦 商品名称：XXXXXX
+💰 商品价格：XX.XX元
+🎁 佣金/福利：XX元（收货好评后返）
+👤 限接人数：XX人（先到先得）
+━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ 重要提醒：
+🚫 <span class="warn">禁止使用信用卡、花呗分期付款！</span>
+   必须使用【余额/储蓄卡/余额宝】支付
+
+📋 操作步骤：
+
+  <span class="ok">第①步</span>｜打开下方淘口令/链接
+         加购 + 收藏 该商品
+
+  <span class="ok">第②步</span>｜进入店铺主页 → 关注店铺
+         点击「全部商品」→ 按【销量】排序
+         随意浏览 → 再收藏加购【任意2件】商品
+
+  <span class="ok">第③步</span>｜返回【购物车】
+         找到第①步加购的商品 → 直接拍下付款
+
+  <span class="ok">第④步</span>｜收到货后 → 确认收货 → 五星好评
+         📸 参与晒单评价可另返3元（找群主要晒图模板）
+
+━━━━━━━━━━━━━━━━━━━━━
+📌 接单间隔：12天内不可重复接单
+📌 付款方式：余额 / 储蓄卡 / 余额宝
+📌 返款时间：确认收货好评后 24小时内
+📌 晒单奖励：额外 +3元
+
+✅ 接单请回复：已接单 + 淘宝昵称<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--green)"></div><h3>接单人操作指南</h3><span class="sub">· 四步图文指引（发给接单人）</span></div><span class="b b-g"><span class="b-i"></span>操作指引</span></div>
+      <div class="cd-b" style="padding:18px 22px">
+        <div class="wf-step">
+          <div class="wf-num" style="background:linear-gradient(135deg,var(--green),#1da87a)">1</div>
+          <div class="wf-body">
+            <h4>打开淘口令 → 加购 + 收藏</h4>
+            <p><span class="wf-tag wf-do">加购</span><span class="wf-tag wf-do">收藏</span> 复制淘口令，打开淘宝APP自动弹出 → 进入商品页面 → 点「加入购物车」→ 点「❤收藏」</p>
+            <p><span class="wf-tag wf-tip">注意</span> 不要立刻下单！先完成后续步骤</p>
+          </div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-num" style="background:linear-gradient(135deg,var(--blue),#3b7ddd)">2</div>
+          <div class="wf-body">
+            <h4>关注店铺 + 浏览加购其他商品</h4>
+            <p><span class="wf-tag wf-do">关注</span><span class="wf-tag wf-do">加购×2</span> 点击店铺名进入主页 → 点「+关注」→ 全部商品 → 按【销量】排序 → 浏览3-5件 → 挑2件「加购+收藏」</p>
+            <p><span class="wf-tag wf-tip">建议</span> 每件商品浏览停留 1-2 分钟</p>
+          </div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-num" style="background:linear-gradient(135deg,var(--accent),#d44d1a)">3</div>
+          <div class="wf-body">
+            <h4>返回购物车 → 拍下付款</h4>
+            <p><span class="wf-tag wf-do">购物车下单</span> 打开购物车 → 只勾选第①步加购的主商品 → 提交订单 → 付款</p>
+            <p><span class="wf-tag wf-dont">禁止</span> 不要选信用卡 / 花呗分期</p>
+            <p><span class="wf-tag wf-do">正确支付</span> 余额 / 余额宝 / 储蓄卡</p>
+          </div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-num" style="background:linear-gradient(135deg,var(--purple),#7c5cda)">4</div>
+          <div class="wf-body">
+            <h4>收货 + 好评 + 晒单</h4>
+            <p><span class="wf-tag wf-do">好评</span> 收到快递 → 确认收货 → 五星好评 + 15字以上</p>
+            <p><span class="wf-tag wf-tip">+3元</span> 找群主要晒图模板 → 带图评价 → 截图发群主领额外3元</p>
+          </div>
+        </div>
+      </div>
+      <div class="nt"><span class="nt-ico">📸</span><span>完成后需提交截图：① 订单详情页 ② 好评截图（如已评价）</span></div>
+    </div>
+
+    <!-- 福利任务发布管理表 -->
+    <div class="cd">
+      <div class="cd-h">
+        <div class="cd-hl"><div class="cd-dot" style="background:var(--yellow)"></div><h3>福利任务发布管理表</h3><span class="sub">· 每期任务总览</span></div>
+        <div class="cd-hr">
+          <button class="btn btn-accent btn-sm" onclick="addRow('wfPubTable')">+ 新增任务</button>
+        </div>
+      </div>
+      <div class="cd-b">
+        <table id="wfPubTable">
+          <thead><tr><th style="width:40px">#</th><th>期数</th><th>发布日期</th><th>商品名称</th><th>淘口令</th><th>商品价格</th><th>基础佣金</th><th>晒单奖励</th><th>限接人数</th><th>已接人数</th><th>剩余名额</th><th>状态</th><th style="width:50px">操作</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 接单明细表 -->
+    <div class="cd">
+      <div class="cd-h">
+        <div class="cd-hl"><div class="cd-dot" style="background:var(--blue)"></div><h3>福利任务 · 接单明细表</h3><span class="sub">· 每位接单人的完整状态追踪</span></div>
+        <div class="cd-hr">
+          <button class="btn btn-accent btn-sm" onclick="addRow('wfDetailTable')">+ 新增接单</button>
+        </div>
+      </div>
+      <div class="cd-b">
+        <table id="wfDetailTable">
+          <thead><tr><th style="width:40px">#</th><th>期数</th><th>接单日期</th><th>淘宝昵称</th><th>联系方式</th><th>下单时间</th><th>订单编号</th><th>实付</th><th>快递单号</th><th>签收</th><th>确认收货</th><th>好评</th><th>晒单</th><th>基础返款</th><th>晒单奖</th><th>总返款</th><th>返款日期</th><th>付款方式</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="nt"><span class="nt-ico">💡</span><span>晒单奖励默认3元 · 总返款 = 基础佣金 + 晒单奖励（已晒单时） · 付款方式必须为余额/储蓄卡/余额宝</span></div>
+    </div>
+
+    <!-- 接单间隔管理 -->
+    <div class="cd">
+      <div class="cd-h">
+        <div class="cd-hl"><div class="cd-dot" style="background:var(--purple)"></div><h3>接单间隔管理表</h3><span class="sub">· 核心规则：两次接单间隔 ≥ 12天</span></div>
+        <span class="b b-p"><span class="b-i"></span>间隔管控</span>
+      </div>
+      <div class="cd-b">
+        <table id="wfIntervalTable">
+          <thead><tr><th style="width:40px">#</th><th>淘宝昵称</th><th>上次接单日期</th><th>上次期数</th><th>距今天数</th><th>间隔要求</th><th>下次可接日期</th><th>是否可接</th><th style="width:50px">操作</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="nt"><span class="nt-ico">📅</span><span>间隔公式：距今天数 = 今天 - 上次接单日期 · ≥ 12 → 可接 · < 12 → 需等待 (12 - 距今天数) 天</span></div>
+    </div>
+
+    <!-- 福利任务检查流程 -->
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--cyan)"></div><h3>福利任务 · 检查流程</h3><span class="sub">· 针对福利任务定制的检查项</span></div></div>
+      <div class="cd-b">
+        <table>
+          <thead><tr><th>阶段</th><th>检查项</th><th>标准</th><th>检查方式</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td rowspan="4"><strong style="color:var(--green)">下单前</strong></td><td>付款方式</td><td>余额/储蓄卡/余额宝，<span style="color:var(--red)">非信用卡分期</span></td><td>要求接单人确认</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-1"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
+            <tr><td>接单间隔</td><td>距上次接单 ≥ 12天</td><td>查间隔管理表</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-2"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
+            <tr><td>名额检查</td><td>当期剩余名额 > 0</td><td>查发布管理表</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-3"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
+            <tr><td>淘口令有效</td><td>复制后正常弹出商品页</td><td>自己先测试</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-4"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
+            <tr><td rowspan="2"><strong style="color:var(--yellow)">下单后</strong></td><td>订单详情页截图</td><td>订单编号、金额、时间、地址</td><td>人工核验</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-post-1"><option value="pending">待提交</option><option value="pass">✅ 已交</option><option value="fail">❌ 不合格</option></select></td></tr>
+            <tr><td>购物车截图（选交）</td><td>确认从购物车下单，3件商品</td><td>人工核验</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-post-2"><option value="pending">选交</option><option value="pass">✅ 已交</option><option value="skip">⏭ 未交</option></select></td></tr>
+            <tr><td rowspan="4"><strong style="color:var(--accent)">签收后</strong></td><td>物流签收</td><td>显示已签收</td><td>快递100查询</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-recv-1"><option value="pending">待检查</option><option value="pass">✅ 已签</option><option value="fail">❌ 未签</option></select></td></tr>
+            <tr><td>确认收货</td><td>买家已点确认收货</td><td>后台查看</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-recv-2"><option value="pending">待确认</option><option value="pass">✅ 已确认</option><option value="fail">❌ 未确认</option></select></td></tr>
+            <tr><td>好评</td><td>五星 + 15字以上</td><td>前台查看</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-recv-3"><option value="pending">待好评</option><option value="pass">✅ 已好评</option><option value="fail">❌ 未评</option></select></td></tr>
+            <tr><td>晒单（可选）</td><td>带图评价 ≥ 3张</td><td>接单人截图</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-recv-4"><option value="pending">选做</option><option value="pass">✅ 已晒</option><option value="skip">⏭ 未晒</option></select></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 催收货话术 -->
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--pink)"></div><h3>福利任务 · 催确认收货话术</h3><span class="sub">· 签收后 1天 → 3天 → 5天 → 7天</span></div></div>
+      <div class="cd-b">
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-1">签收 +1天</span><span class="sb-tle">温馨提醒</span></div>
+          <div class="sb-c" data-script="wf-urge-1">亲，物流显示已签收啦~ 商品还满意吗？满意的话帮忙确认收货+好评哦，好给您返款~ <span class="hl">晒单还能额外拿3元哦！</span><button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-2">签收 +3天</span><span class="sb-tle">二次跟进</span></div>
+          <div class="sb-c" data-script="wf-urge-2">亲，打扰啦~ 那单福利商品收到了吧？麻烦帮忙确认收货+好评哈，确认后24h内返款给您🙏 <span class="hl">晒图评价截图发我，再+3元~</span><button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-3">签收 +5天</span><span class="sb-tle">重点催促</span></div>
+          <div class="sb-c" data-script="wf-urge-3">亲，这单已签收5天了哦~ 再不确认的话系统会自动确认的，自动确认的话返款会比较慢，建议现在操作一下~ 有问题随时找我！<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-4">签收 +7天</span><span class="sb-tle">最后提醒</span></div>
+          <div class="sb-c" data-script="wf-urge-4">亲，最后提醒一次哦。如果商品有问题可以联系我退换，如果没问题麻烦确认收货好评~ <span class="warn">超时未操作的话，按照约定返款将无法结算</span>。麻烦在XX日前回复，谢谢！<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 禁止事项 -->
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--red)"></div><h3>福利任务 · 禁止事项清单</h3><span class="sub">· 违反任意一条：当期返款取消 + 永久取消资格</span></div><span class="b b-r"><span class="b-i"></span>红线规则</span></div>
+      <div class="cd-b">
+        <div class="forbid-grid">
+          <div class="forbid-item">🚫 禁止使用信用卡付款</div>
+          <div class="forbid-item">🚫 禁止使用花呗分期付款</div>
+          <div class="forbid-item">🚫 禁止12天内重复接单</div>
+          <div class="forbid-item">🚫 禁止直接点链接下单（必须购物车）</div>
+          <div class="forbid-item">🚫 禁止不加购/不收藏/不关注直接下单</div>
+          <div class="forbid-item">🚫 禁止收到货后不确认收货</div>
+          <div class="forbid-item">🚫 禁止给中差评</div>
+          <div class="forbid-item">🚫 禁止将任务信息转发/截图给他人</div>
+          <div class="forbid-item">🚫 禁止使用虚拟/批量收货地址</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ═══ Toast Container ═══ -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ═══ Modal ═══ -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-h"><h3 id="modalTitle">确认</h3><button class="btn btn-icon" onclick="closeModal()" style="border:0;background:0;color:var(--text-3);font-size:18px">✕</button></div>
+    <div class="modal-b" id="modalBody"></div>
+    <div class="modal-f" id="modalFooter"></div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// Core: Tab navigation
+// ─────────────────────────────────────────────
+function go(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('on',j===i));
+  document.querySelectorAll('.pn').forEach((p,j)=>p.classList.toggle('on',j===i));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─────────────────────────────────────────────
+// Toast notifications
+// ─────────────────────────────────────────────
+function toast(msg, type='success'){
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast toast-' + type;
+  t.innerHTML = msg;
+  c.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(40px)'; t.style.transition='all .3s'; setTimeout(()=>t.remove(),300); }, 2500);
+}
+
+// ─────────────────────────────────────────────
+// Modal
+// ─────────────────────────────────────────────
+function openModal(title, bodyHtml, footerHtml){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = bodyHtml;
+  document.getElementById('modalFooter').innerHTML = footerHtml;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+// ─────────────────────────────────────────────
+// LocalStorage helpers
+// ─────────────────────────────────────────────
+const LS_PREFIX = 'fdsys_v2_';
+function lsGet(key, fallback){
+  try{ const v = localStorage.getItem(LS_PREFIX + key); return v ? JSON.parse(v) : fallback; } catch(e){ return fallback; }
+}
+function lsSet(key, val){
+  try{ localStorage.setItem(LS_PREFIX + key, JSON.stringify(val)); } catch(e){ console.warn('Storage full', e); }
+}
+
+// ─────────────────────────────────────────────
+// Copy script to clipboard
+// ─────────────────────────────────────────────
+function copyScript(btn){
+  const container = btn.parentElement;
+  const clone = container.cloneNode(true);
+  const cb = clone.querySelector('.copy-btn');
+  if(cb) cb.remove();
+  // Get text content, preserving line breaks
+  const text = clone.innerText.trim();
+  navigator.clipboard.writeText(text).then(()=>{
+    toast('✅ 已复制到剪贴板');
+    btn.textContent = '已复制 ✓';
+    setTimeout(()=>btn.textContent='复制', 1500);
+  }).catch(()=>{
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.cssText='position:fixed;left:-9999px';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    toast('✅ 已复制到剪贴板');
+    btn.textContent = '已复制 ✓';
+    setTimeout(()=>btn.textContent='复制', 1500);
+  });
+}
+
+// ─────────────────────────────────────────────
+// Checklist toggle (Panel 1)
+// ─────────────────────────────────────────────
+function toggle(el){
+  const cb=el.querySelector('.ckb');
+  cb.classList.toggle('on');
+  el.classList.toggle('on-text');
+  // Save state
+  const key = el.dataset.key;
+  if(key){
+    const states = lsGet('checklist', {});
+    states[key] = cb.classList.contains('on');
+    lsSet('checklist', states);
+    debouncePush();
+  }
+}
+function loadChecklist(){
+  const states = lsGet('checklist', {});
+  document.querySelectorAll('.ck[data-key]').forEach(el=>{
+    if(states[el.dataset.key]){
+      el.querySelector('.ckb').classList.add('on');
+      el.classList.add('on-text');
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+// Inline select state saving
+// ─────────────────────────────────────────────
+function saveChecklistState(sel){
+  const key = sel.dataset.key;
+  if(key){
+    const states = lsGet('selectStates', {});
+    states[key] = sel.value;
+    lsSet('selectStates', states);
+    debouncePush();
+  }
+}
+function loadSelectStates(){
+  const states = lsGet('selectStates', {});
+  document.querySelectorAll('.inline-select[data-key]').forEach(sel=>{
+    if(states[sel.dataset.key] !== undefined){
+      sel.value = states[sel.dataset.key];
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+// Table definitions
+// ─────────────────────────────────────────────
+const TABLE_DEFS = {
+  regTable: {
+    storageKey: 'regData',
+    columns: [
+      { key:'idx', label:'#', type:'auto', width:40 },
+      { key:'nickname', label:'接单人昵称', type:'text' },
+      { key:'contact', label:'联系方式', type:'text' },
+      { key:'level', label:'账号等级', type:'text' },
+      { key:'vip88', label:'88VIP', type:'select', options:['否','是'] },
+      { key:'zhima', label:'芝麻信用', type:'text' },
+      { key:'recent30', label:'近30天同类目', type:'text' },
+      { key:'city', label:'所在城市', type:'text' },
+      { key:'date', label:'放单日期', type:'date' },
+      { key:'product', label:'商品名称', type:'text' },
+      { key:'keyword', label:'关键词', type:'text' },
+      { key:'orderId', label:'订单编号', type:'text' },
+      { key:'amount', label:'拍下金额', type:'text' },
+      { key:'commission', label:'佣金', type:'text' },
+      { key:'tracking', label:'快递单号', type:'text' },
+      { key:'delivery', label:'签收状态', type:'status', options:['未发货','运输中','已签收'] },
+      { key:'confirm', label:'确认收货', type:'status', options:['未确认','已确认'] },
+      { key:'review', label:'好评', type:'status', options:['未评价','已好评','已晒图'] },
+      { key:'payStatus', label:'佣金结算', type:'status', options:['未结','已结','已拒付'] },
+      { key:'note', label:'备注', type:'text' }
+    ],
+    empty: { nickname:'',contact:'',level:'',vip88:'否',zhima:'',recent30:'',city:'',date:'',product:'',keyword:'',orderId:'',amount:'',commission:'',tracking:'',delivery:'未发货',confirm:'未确认',review:'未评价',payStatus:'未结',note:'' }
+  },
+  excTable: {
+    storageKey: 'excData',
+    columns: [
+      { key:'idx', label:'#', type:'auto', width:40 },
+      { key:'date', label:'日期', type:'date' },
+      { key:'orderId', label:'订单编号', type:'text' },
+      { key:'person', label:'接单人', type:'text' },
+      { key:'excType', label:'异常类型', type:'select', options:['退款','差评','物流异常','失联','评价不显示','降权','举报','其他'] },
+      { key:'detail', label:'详情', type:'text' },
+      { key:'solution', label:'处理方式', type:'text' },
+      { key:'result', label:'处理结果', type:'status', options:['待处理','处理中','已解决','已放弃'] },
+      { key:'handler', label:'处理人', type:'text' }
+    ],
+    empty: { date:'',orderId:'',person:'',excType:'其他',detail:'',solution:'',result:'待处理',handler:'' }
+  },
+  kwTable: {
+    storageKey: 'kwData',
+    columns: [
+      { key:'idx', label:'#', type:'auto', width:40 },
+      { key:'keyword', label:'关键词', type:'text' },
+      { key:'popularity', label:'搜索人气', type:'text' },
+      { key:'competition', label:'竞争度', type:'status', options:['低','中','高'] },
+      { key:'used', label:'已用次数', type:'number' },
+      { key:'lastUsed', label:'最近使用', type:'date' },
+      { key:'interval', label:'间隔天数', type:'text' },
+      { key:'nextAvail', label:'下次可用', type:'text' },
+      { key:'dailyLimit', label:'日上限', type:'text' },
+      { key:'status', label:'状态', type:'status', options:['可用','冷却中','已禁用'] }
+    ],
+    empty: { keyword:'',popularity:'',competition:'低',used:0,lastUsed:'',interval:'3天',nextAvail:'',dailyLimit:'3-5单/天',status:'可用' }
+  },
+  wfPubTable: {
+    storageKey: 'wfPubData',
+    columns: [
+      { key:'idx', label:'#', type:'auto', width:40 },
+      { key:'period', label:'期数', type:'text' },
+      { key:'date', label:'发布日期', type:'date' },
+      { key:'product', label:'商品名称', type:'text' },
+      { key:'taoCode', label:'淘口令', type:'text' },
+      { key:'price', label:'商品价格', type:'text' },
+      { key:'commission', label:'基础佣金', type:'text' },
+      { key:'bonus', label:'晒单奖励', type:'text' },
+      { key:'limit', label:'限接人数', type:'text' },
+      { key:'joined', label:'已接人数', type:'text' },
+      { key:'remain', label:'剩余名额', type:'text' },
+      { key:'status', label:'状态', type:'status', options:['未开始','进行中','已结束','已取消'] }
+    ],
+    empty: { period:'',date:'',product:'',taoCode:'',price:'',commission:'',bonus:'+¥3.00',limit:'',joined:'0',remain:'',status:'未开始' }
+  },
+  wfDetailTable: {
+    storageKey: 'wfDetailData',
+    columns: [
+      { key:'idx', label:'#', type:'auto', width:40 },
+      { key:'period', label:'期数', type:'text' },
+      { key:'date', label:'接单日期', type:'date' },
+      { key:'nickname', label:'淘宝昵称', type:'text' },
+      { key:'contact', label:'联系方式', type:'text' },
+      { key:'orderTime', label:'下单时间', type:'text' },
+      { key:'orderId', label:'订单编号', type:'text' },
+      { key:'paid', label:'实付', type:'text' },
+      { key:'tracking', label:'快递单号', type:'text' },
+      { key:'delivery', label:'签收', type:'status', options:['未发货','运输中','已签收'] },
+      { key:'confirm', label:'确认收货', type:'status', options:['未确认','已确认'] },
+      { key:'review', label:'好评', type:'status', options:['未评价','已好评'] },
+      { key:'photoReview', label:'晒单', type:'status', options:['未晒单','已晒单'] },
+      { key:'basePay', label:'基础返款', type:'text' },
+      { key:'bonusPay', label:'晒单奖', type:'text' },
+      { key:'totalPay', label:'总返款', type:'text' },
+      { key:'payDate', label:'返款日期', type:'date' },
+      { key:'payMethod', label:'付款方式', type:'status', options:['余额','储蓄卡','余额宝','信用卡(违规)','花呗(违规)'] },
+      { key:'note', label:'备注', type:'text' }
+    ],
+    empty: { period:'',date:'',nickname:'',contact:'',orderTime:'',orderId:'',paid:'',tracking:'',delivery:'未发货',confirm:'未确认',review:'未评价',photoReview:'未晒单',basePay:'',bonusPay:'',totalPay:'',payDate:'',payMethod:'余额',note:'' }
+  },
+  wfIntervalTable: {
+    storageKey: 'wfIntervalData',
+    columns: [
+      { key:'idx', label:'#', type:'auto', width:40 },
+      { key:'nickname', label:'淘宝昵称', type:'text' },
+      { key:'lastDate', label:'上次接单日期', type:'date' },
+      { key:'lastPeriod', label:'上次期数', type:'text' },
+      { key:'daysAgo', label:'距今天数', type:'computed-interval' },
+      { key:'intervalReq', label:'间隔要求', type:'computed-static', value:'≥ 12天' },
+      { key:'nextDate', label:'下次可接日期', type:'computed-next' },
+      { key:'canJoin', label:'是否可接', type:'computed-canjoin' }
+    ],
+    empty: { nickname:'',lastDate:'',lastPeriod:'' },
+    noDelete: false
+  }
+};
+
+// ─────────────────────────────────────────────
+// Render table from stored data
+// ─────────────────────────────────────────────
+function renderTable(tableId){
+  const def = TABLE_DEFS[tableId];
+  if(!def) return;
+  const data = lsGet(def.storageKey, []);
+  const tbody = document.querySelector('#' + tableId + ' tbody');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+
+  if(data.length === 0){
+    const tr = document.createElement('tr');
+    tr.className = 'empty-row';
+    const td = document.createElement('td');
+    td.colSpan = def.columns.length + 1;
+    td.textContent = '暂无数据，点击「新增」按钮添加';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+    return;
+  }
+
+  data.forEach((row, ri) => {
+    const tr = document.createElement('tr');
+    def.columns.forEach(col => {
+      const td = document.createElement('td');
+      if(col.type === 'auto'){
+        td.textContent = ri + 1;
+        td.style.color = 'var(--text-4)';
+        td.style.fontFamily = 'var(--mono)';
+        td.style.fontSize = '11px';
+      } else if(col.type === 'text' || col.type === 'number' || col.type === 'date'){
+        td.contentEditable = true;
+        td.className = 'editable';
+        td.textContent = row[col.key] || '';
+        td.dataset.row = ri;
+        td.dataset.key = col.key;
+        td.addEventListener('blur', function(){ saveCell(tableId, ri, col.key, this.textContent); });
+        td.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); this.blur(); } });
+      } else if(col.type === 'select'){
+        const sel = document.createElement('select');
+        sel.className = 'inline-select';
+        col.options.forEach(opt => {
+          const o = document.createElement('option');
+          o.value = opt; o.textContent = opt;
+          if(row[col.key] === opt) o.selected = true;
+          sel.appendChild(o);
+        });
+        sel.dataset.row = ri;
+        sel.dataset.key = col.key;
+        sel.addEventListener('change', function(){ saveCell(tableId, ri, col.key, this.value); });
+        td.appendChild(sel);
+      } else if(col.type === 'status'){
+        const sel = document.createElement('select');
+        sel.className = 'inline-select';
+        col.options.forEach(opt => {
+          const o = document.createElement('option');
+          o.value = opt; o.textContent = opt;
+          if(row[col.key] === opt) o.selected = true;
+          sel.appendChild(o);
+        });
+        sel.dataset.row = ri;
+        sel.dataset.key = col.key;
+        sel.addEventListener('change', function(){ saveCell(tableId, ri, col.key, this.value); });
+        td.appendChild(sel);
+      } else if(col.type === 'computed-interval'){
+        td.textContent = computeInterval(row.lastDate);
+        td.style.fontFamily = 'var(--mono)';
+        td.style.fontSize = '11.5px';
+      } else if(col.type === 'computed-static'){
+        td.textContent = col.value;
+        td.style.fontFamily = 'var(--mono)';
+        td.style.fontSize = '11.5px';
+      } else if(col.type === 'computed-next'){
+        const v = computeNextDate(row.lastDate);
+        td.textContent = v;
+        td.style.fontFamily = 'var(--mono)';
+        td.style.fontSize = '11.5px';
+      } else if(col.type === 'computed-canjoin'){
+        const canJoin = computeCanJoin(row.lastDate);
+        td.innerHTML = canJoin
+          ? '<span class="b b-g"><span class="b-i"></span>✅ 可接</span>'
+          : '<span class="b b-r"><span class="b-i"></span>❌ 未满（差' + (12 - daysDiff(row.lastDate)) + '天）</span>';
+      }
+      tr.appendChild(td);
+    });
+    // Actions column
+    const actTd = document.createElement('td');
+    actTd.innerHTML = '<div class="row-actions"><button class="btn btn-red btn-sm" onclick="deleteRow(\''+tableId+'\','+ri+')" title="删除">🗑</button></div>';
+    tr.appendChild(actTd);
+    tbody.appendChild(tr);
+  });
+}
+
+function saveCell(tableId, rowIdx, key, value){
+  const def = TABLE_DEFS[tableId];
+  const data = lsGet(def.storageKey, []);
+  if(data[rowIdx]){
+    data[rowIdx][key] = value;
+    lsSet(def.storageKey, data);
+    updateStats();
+    debouncePush();
+  }
+}
+
+function addRow(tableId){
+  const def = TABLE_DEFS[tableId];
+  const data = lsGet(def.storageKey, []);
+  data.push({...def.empty});
+  lsSet(def.storageKey, data);
+  renderTable(tableId);
+  updateStats();
+  debouncePush();
+  toast('✅ 已新增一行');
+}
+
+function deleteRow(tableId, rowIdx){
+  const def = TABLE_DEFS[tableId];
+  openModal('确认删除', '<p style="color:var(--text-2);font-size:13px">确定要删除第 ' + (rowIdx+1) + ' 行数据吗？此操作不可撤销。</p>',
+    '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-red" onclick="confirmDelete(\''+tableId+'\','+rowIdx+')">确认删除</button>'
+  );
+}
+function confirmDelete(tableId, rowIdx){
+  const def = TABLE_DEFS[tableId];
+  const data = lsGet(def.storageKey, []);
+  data.splice(rowIdx, 1);
+  lsSet(def.storageKey, data);
+  renderTable(tableId);
+  updateStats();
+  closeModal();
+  debouncePush();
+  toast('🗑 已删除');
+}
+
+// ─────────────────────────────────────────────
+// Computed fields for interval table
+// ─────────────────────────────────────────────
+function daysDiff(dateStr){
+  if(!dateStr) return 0;
+  const d = new Date(dateStr);
+  if(isNaN(d)) return 0;
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  d.setHours(0,0,0,0);
+  return Math.floor((now - d) / 86400000);
+}
+function computeInterval(dateStr){
+  const d = daysDiff(dateStr);
+  return d > 0 ? d + '天' : (dateStr ? '今天' : '-');
+}
+function computeNextDate(dateStr){
+  if(!dateStr) return '-';
+  const d = new Date(dateStr);
+  if(isNaN(d)) return '-';
+  d.setDate(d.getDate() + 12);
+  return d.toISOString().split('T')[0];
+}
+function computeCanJoin(dateStr){
+  return daysDiff(dateStr) >= 12;
+}
+
+// ─────────────────────────────────────────────
+// Stats bar
+// ─────────────────────────────────────────────
+function updateStats(){
+  const reg = lsGet('regData', []);
+  const kw = lsGet('kwData', []);
+  const exc = lsGet('excData', []);
+  const wfPub = lsGet('wfPubData', []);
+  const wfDetail = lsGet('wfDetailData', []);
+
+  const totalOrders = reg.length + wfDetail.length;
+  const pendingPay = reg.filter(r => r.payStatus === '未结').length + wfDetail.filter(r => !r.payDate).length;
+  const excPending = exc.filter(r => r.result === '待处理').length;
+  const kwAvail = kw.filter(r => r.status === '可用').length;
+
+  document.getElementById('statsBar').innerHTML = `
+    <div class="st"><div class="st-i" style="background:var(--accent-glow);color:var(--accent)">📋</div><div><div class="st-l">接单人总数</div><div class="st-v" style="color:var(--accent)">${reg.length}</div></div></div>
+    <div class="st"><div class="st-i" style="background:var(--green-bg);color:var(--green)">📦</div><div><div class="st-l">福利接单</div><div class="st-v" style="color:var(--green)">${wfDetail.length}</div></div></div>
+    <div class="st"><div class="st-i" style="background:var(--yellow-bg);color:var(--yellow)">⏳</div><div><div class="st-l">待结算佣金</div><div class="st-v" style="color:var(--yellow)">${pendingPay}</div></div></div>
+    <div class="st"><div class="st-i" style="background:var(--red-bg);color:var(--red)">⚠️</div><div><div class="st-l">待处理异常</div><div class="st-v" style="color:var(--red)">${excPending}</div></div></div>
+    <div class="st"><div class="st-i" style="background:var(--blue-bg);color:var(--blue)">🔑</div><div><div class="st-l">可用关键词</div><div class="st-v" style="color:var(--blue)">${kwAvail}</div></div></div>
+    <div class="st"><div class="st-i" style="background:var(--purple-bg);color:var(--purple)">🎁</div><div><div class="st-l">福利任务期</div><div class="st-v" style="color:var(--purple)">${wfPub.length}</div></div></div>
+  `;
+}
+
+// ─────────────────────────────────────────────
+// Export / Import
+// ─────────────────────────────────────────────
+function exportData(){
+  const all = {};
+  for(let i=0; i<localStorage.length; i++){
+    const k = localStorage.key(i);
+    if(k.startsWith(LS_PREFIX)){
+      all[k.replace(LS_PREFIX, '')] = JSON.parse(localStorage.getItem(k));
+    }
+  }
+  const blob = new Blob([JSON.stringify(all, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '放单系统备份_' + new Date().toISOString().split('T')[0] + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('📥 数据已导出');
+}
+
+function importData(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = JSON.parse(e.target.result);
+      Object.keys(data).forEach(k => {
+        lsSet(k, data[k]);
+      });
+      loadAll();
+      toast('📤 数据已恢复，共导入 ' + Object.keys(data).length + ' 项');
+    }catch(err){
+      toast('❌ 导入失败：文件格式不正确', 'error');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function clearAllData(){
+  openModal('⚠️ 确认重置', '<p style="color:var(--text-2);font-size:13px">此操作将清除所有已保存的数据（话术模板除外），包括：<br><br>· 接单人登记表<br>· 异常登记表<br>· 关键词管理表<br>· 福利任务所有表格<br>· Checklist 状态<br><br><strong style="color:var(--red)">此操作不可撤销！建议先导出备份。</strong></p>',
+    '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-red" onclick="confirmClear()">确认重置</button>'
+  );
+}
+function confirmClear(){
+  const keys = [];
+  for(let i=0; i<localStorage.length; i++){
+    const k = localStorage.key(i);
+    if(k.startsWith(LS_PREFIX)) keys.push(k);
+  }
+  keys.forEach(k => localStorage.removeItem(k));
+  loadAll();
+  updateSyncUI('off', '☁️ 云端同步：已断开（数据已重置）');
+  closeModal();
+  toast('🗑 已重置所有本地数据');
+}
+
+// ─────────────────────────────────────────────
+// Cloud Sync (GitHub Gist)
+// ─────────────────────────────────────────────
+const CLOUD_PREFIX = 'fdsys_cloud_'; // separate from data prefix to survive reset
+let cloudPat = localStorage.getItem(CLOUD_PREFIX + 'pat') || '';
+let gistId = localStorage.getItem(CLOUD_PREFIX + 'gistId') || '';
+let syncTimer = null;
+let isSyncing = false;
+
+function getCloudConfig(){ return { pat: cloudPat, gistId: gistId }; }
+function setCloudConfig(pat, gid){ cloudPat=pat; gistId=gid; localStorage.setItem(CLOUD_PREFIX+'pat',pat); localStorage.setItem(CLOUD_PREFIX+'gistId',gid); }
+
+function updateSyncUI(status, msg){
+  const dot = document.getElementById('syncDot');
+  const info = document.getElementById('syncInfo');
+  const btnP = document.getElementById('btnPull');
+  const btnP2 = document.getElementById('btnPush');
+  dot.className = 'sync-dot ' + status;
+  info.innerHTML = msg;
+  const connected = status === 'ok' || status === 'sync';
+  btnP.disabled = !connected;
+  btnP2.disabled = !connected;
+}
+
+function gatherAllData(){
+  const all = {};
+  for(let i=0; i<localStorage.length; i++){
+    const k = localStorage.key(i);
+    if(k.startsWith(LS_PREFIX)){
+      all[k.replace(LS_PREFIX, '')] = JSON.parse(localStorage.getItem(k));
+    }
+  }
+  all['_cloud_meta'] = { lastModified: new Date().toISOString(), version: 2 };
+  return all;
+}
+
+function loadCloudData(data){
+  Object.keys(data).forEach(k => {
+    if(k === '_cloud_meta') return;
+    lsSet(k, data[k]);
+  });
+  loadAll();
+}
+
+async function createGist(data){
+  const resp = await fetch('https://api.github.com/gists', {
+    method: 'POST',
+    headers: { 'Authorization': 'token '+cloudPat, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      description: '放单运营管理系统 - 数据备份 (自动同步)',
+      public: false,
+      files: { 'fdsys-data.json': { content: JSON.stringify(data, null, 2) } }
+    })
+  });
+  if(!resp.ok) throw new Error('创建Gist失败: ' + resp.status);
+  const gist = await resp.json();
+  return gist.id;
+}
+
+async function updateGist(gid, data){
+  const resp = await fetch('https://api.github.com/gists/' + gid, {
+    method: 'PATCH',
+    headers: { 'Authorization': 'token '+cloudPat, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      files: { 'fdsys-data.json': { content: JSON.stringify(data, null, 2) } }
+    })
+  });
+  if(!resp.ok) throw new Error('更新Gist失败: ' + resp.status);
+  return await resp.json();
+}
+
+async function readGist(gid){
+  const resp = await fetch('https://api.github.com/gists/' + gid, {
+    headers: { 'Authorization': 'token '+cloudPat }
+  });
+  if(!resp.ok) throw new Error('读取Gist失败: ' + resp.status);
+  const gist = await resp.json();
+  const file = gist.files['fdsys-data.json'];
+  if(!file) throw new Error('Gist中无数据文件');
+  return JSON.parse(file.content);
+}
+
+async function cloudPush(){
+  if(!cloudPat){ showCloudSetup(); return; }
+  if(isSyncing) return;
+  isSyncing = true;
+  updateSyncUI('sync', '⬆ 正在推送到云端...');
+  try {
+    const data = gatherAllData();
+    if(!gistId){
+      gistId = await createGist(data);
+      localStorage.setItem(CLOUD_PREFIX + 'gistId', gistId);
+    } else {
+      await updateGist(gistId, data);
+    }
+    localStorage.setItem(CLOUD_PREFIX + 'lastPush', new Date().toISOString());
+    updateSyncUI('ok', '☁️ 已连接 · 上次同步：' + new Date().toLocaleTimeString('zh-CN'));
+    toast('⬆ 数据已推送到云端');
+  } catch(e){
+    updateSyncUI('err', '❌ 推送失败：' + e.message);
+    toast('❌ 推送失败：' + e.message, 'error');
+    if(e.message.includes('401')){ toast('⚠️ Token 已过期，请重新设置', 'error'); }
+  }
+  isSyncing = false;
+}
+
+async function cloudPull(){
+  if(!cloudPat || !gistId){ showCloudSetup(); return; }
+  if(isSyncing) return;
+  isSyncing = true;
+  updateSyncUI('sync', '⬇ 正从云端拉取...');
+  try {
+    const cloudData = await readGist(gistId);
+    const localData = gatherAllData();
+    const cloudTime = cloudData._cloud_meta?.lastModified || '0';
+    const localTime = localData._cloud_meta?.lastModified || '0';
+    // Simple conflict detection: if local has data and timestamps differ significantly
+    const hasLocalData = Object.keys(localData).some(k => k !== '_cloud_meta' && Array.isArray(localData[k]) && localData[k].length > 0);
+    const hasCloudData = Object.keys(cloudData).some(k => k !== '_cloud_meta' && Array.isArray(cloudData[k]) && cloudData[k].length > 0);
+    if(hasLocalData && hasCloudData && cloudTime !== localTime){
+      // Show merge dialog
+      showMergeDialog(localData, cloudData, localTime, cloudTime);
+    } else {
+      loadCloudData(cloudData);
+      updateSyncUI('ok', '☁️ 已连接 · 已拉取云端数据 · ' + new Date().toLocaleTimeString('zh-CN'));
+      toast('⬇ 已从云端拉取数据');
+    }
+  } catch(e){
+    updateSyncUI('err', '❌ 拉取失败：' + e.message);
+    toast('❌ 拉取失败：' + e.message, 'error');
+  }
+  isSyncing = false;
+}
+
+function showMergeDialog(localData, cloudData, localTime, cloudTime){
+  const fmtTime = t => { try { return new Date(t).toLocaleString('zh-CN'); } catch(e){ return t; } };
+  openModal('数据冲突', `
+    <p style="color:var(--text-2);font-size:13px;margin-bottom:14px">本地数据和云端数据都有内容，请选择：</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px">
+      <div style="padding:14px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px">
+        <div style="font-size:12px;color:var(--text-3);margin-bottom:6px">📱 本地数据</div>
+        <div style="font-size:11px;color:var(--text-4)">修改时间：${fmtTime(localTime)}</div>
+      </div>
+      <div style="padding:14px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px">
+        <div style="font-size:12px;color:var(--text-3);margin-bottom:6px">☁️ 云端数据</div>
+        <div style="font-size:11px;color:var(--text-4)">修改时间：${fmtTime(cloudTime)}</div>
+      </div>
+    </div>
+  `, `
+    <button class="btn" onclick="mergeUseLocal()">用本地覆盖云端</button>
+    <button class="btn btn-accent" onclick="mergeUseCloud()">用云端覆盖本地</button>
+    <button class="btn" onclick="closeModal()">取消</button>
+  `);
+}
+function mergeUseLocal(){ closeModal(); cloudPush(); }
+function mergeUseCloud(){
+  closeModal();
+  cloudPull_force();
+}
+async function cloudPull_force(){
+  if(!cloudPat || !gistId) return;
+  isSyncing = true;
+  updateSyncUI('sync', '⬇ 正从云端拉取...');
+  try {
+    const cloudData = await readGist(gistId);
+    loadCloudData(cloudData);
+    updateSyncUI('ok', '☁️ 已连接 · 已拉取云端数据 · ' + new Date().toLocaleTimeString('zh-CN'));
+    toast('⬇ 已用云端数据覆盖本地');
+  } catch(e){
+    updateSyncUI('err', '❌ 拉取失败：' + e.message);
+    toast('❌ 拉取失败', 'error');
+  }
+  isSyncing = false;
+}
+
+function debouncePush(){
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(()=>{
+    if(cloudPat && gistId) cloudPush();
+  }, 2000);
+}
+
+function showCloudSetup(){
+  const connected = !!cloudPat;
+  openModal('☁️ 云端同步设置', `
+    <p style="color:var(--text-2);font-size:12.5px;margin-bottom:14px">数据通过 <strong>GitHub Gist</strong> 私密存储，永久保存，换设备也能用。</p>
+    <div class="form-row">
+      <label>GitHub Personal Access Token</label>
+      <input type="password" class="form-input" id="inputPat" placeholder="ghp_xxxxxxxxxxxx" value="${cloudPat}">
+      <div style="font-size:10.5px;color:var(--text-4);margin-top:5px">
+        需要 <strong>gist</strong> 权限。去 <a href="https://github.com/settings/tokens/new?scopes=gist&description=放单系统同步" target="_blank" style="color:var(--accent)">创建 Token →</a>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Gist ID（留空自动创建）</label>
+      <input type="text" class="form-input" id="inputGistId" placeholder="首次使用留空，会自动创建" value="${gistId}">
+    </div>
+    ${connected ? '<div style="padding:10px 14px;background:var(--green-bg);border:1px solid rgba(52,211,153,.2);border-radius:8px;font-size:12px;color:var(--green)">✅ 当前已连接</div>' : ''}
+  `, `
+    <button class="btn" onclick="closeModal()">取消</button>
+    <button class="btn btn-green" onclick="testCloudConnection()">测试连接</button>
+    <button class="btn btn-accent" onclick="saveCloudSetup()">保存</button>
+  `);
+}
+
+async function testCloudConnection(){
+  const pat = document.getElementById('inputPat').value.trim();
+  if(!pat){ toast('请输入 Token', 'error'); return; }
+  try {
+    const resp = await fetch('https://api.github.com/user', { headers: { 'Authorization': 'token '+pat } });
+    if(!resp.ok) throw new Error('认证失败');
+    const user = await resp.json();
+    toast('✅ 连接成功：' + user.login);
+  } catch(e){
+    toast('❌ 连接失败：' + e.message, 'error');
+  }
+}
+
+async function saveCloudSetup(){
+  const pat = document.getElementById('inputPat').value.trim();
+  const gid = document.getElementById('inputGistId').value.trim();
+  if(!pat){ toast('请输入 Token', 'error'); return; }
+  setCloudConfig(pat, gid);
+  closeModal();
+  updateSyncUI('sync', '⏳ 正在验证...');
+  try {
+    // Verify token
+    const resp = await fetch('https://api.github.com/user', { headers: { 'Authorization': 'token '+pat } });
+    if(!resp.ok) throw new Error('Token 无效');
+    // If no gist ID, try to find existing gist or create new one
+    if(!gid){
+      // Search for existing gist
+      const gistsResp = await fetch('https://api.github.com/gists', { headers: { 'Authorization': 'token '+pat } });
+      const gists = await gistsResp.json();
+      const existing = gists.find(g => g.description && g.description.includes('放单运营管理系统'));
+      if(existing){
+        gistId = existing.id;
+        localStorage.setItem(CLOUD_PREFIX + 'gistId', gistId);
+        toast('✅ 找到已有备份，正在同步...');
+        await cloudPull_force();
+      } else {
+        toast('✅ 首次连接，正在上传数据...');
+        await cloudPush();
+      }
+    } else {
+      gistId = gid;
+      toast('✅ 云端设置已保存，正在同步...');
+      await cloudPull_force();
+    }
+  } catch(e){
+    updateSyncUI('err', '❌ 连接失败');
+    toast('❌ ' + e.message, 'error');
+  }
+}
+
+function initCloudSync(){
+  if(!cloudPat){
+    updateSyncUI('off', '☁️ 云端同步：未连接 · <span style="color:var(--accent);cursor:pointer" onclick="showCloudSetup()">点击设置</span> 数据永久保存到 GitHub Gist');
+    return;
+  }
+  // Auto pull on page load
+  (async ()=>{
+    updateSyncUI('sync', '⏳ 正在同步...');
+    try {
+      // Verify token
+      const resp = await fetch('https://api.github.com/user', { headers: { 'Authorization': 'token '+cloudPat } });
+      if(!resp.ok) throw new Error('Token 失效');
+      const user = await resp.json();
+      if(!gistId){
+        // Try to find existing gist
+        const gistsResp = await fetch('https://api.github.com/gists', { headers: { 'Authorization': 'token '+cloudPat } });
+        const gists = await gistsResp.json();
+        const existing = gists.find(g => g.description && g.description.includes('放单运营管理系统'));
+        if(existing){
+          gistId = existing.id;
+          localStorage.setItem(CLOUD_PREFIX + 'gistId', gistId);
+        }
+      }
+      if(gistId){
+        const cloudData = await readGist(gistId);
+        // Always load cloud data on startup (cloud is source of truth)
+        loadCloudData(cloudData);
+        updateSyncUI('ok', '☁️ 已连接 <strong>' + user.login + '</strong> · 已同步 · ' + new Date().toLocaleTimeString('zh-CN'));
+      } else {
+        // No gist yet, push local data
+        await cloudPush();
+        updateSyncUI('ok', '☁️ 已连接 <strong>' + user.login + '</strong> · 已创建备份 · ' + new Date().toLocaleTimeString('zh-CN'));
+      }
+    } catch(e){
+      updateSyncUI('err', '❌ 同步失败：' + e.message + ' · <span style="color:var(--accent);cursor:pointer" onclick="showCloudSetup()">重新设置</span>');
+    }
+  })();
+}
+
+// ─────────────────────────────────────────────
+// Load all data
+// ─────────────────────────────────────────────
+function loadAll(){
+  Object.keys(TABLE_DEFS).forEach(renderTable);
+  loadChecklist();
+  loadSelectStates();
+  updateStats();
+}
+
+// ─────────────────────────────────────────────
+// Init
+// ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function(){ loadAll(); initCloudSync(); });
+</script>
+</body>
+</html>
