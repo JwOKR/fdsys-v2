@@ -949,14 +949,6 @@ function updateThemeBtn(isLight){
   const btn = document.getElementById('themeToggle');
   if(btn) btn.innerHTML = isLight ? '🌙 暗黑' : '☀️ 明亮';
 }
-// Load saved theme
-(function(){
-  const saved = localStorage.getItem(LS_PREFIX + 'theme');
-  if(saved === 'light'){
-    document.documentElement.classList.add('light');
-    updateThemeBtn(true);
-  }
-})();
 
 // ─────────────────────────────────────────────
 // Sub-tab switching (4-table module)
@@ -1001,6 +993,15 @@ function lsGet(key, fallback){
 function lsSet(key, val){
   try{ localStorage.setItem(LS_PREFIX + key, JSON.stringify(val)); } catch(e){ console.warn('Storage full', e); }
 }
+
+// Load saved theme (must be after LS_PREFIX is defined)
+(function(){
+  const saved = localStorage.getItem(LS_PREFIX + 'theme');
+  if(saved === 'light'){
+    document.documentElement.classList.add('light');
+    updateThemeBtn(true);
+  }
+})();
 
 // ─────────────────────────────────────────────
 // Copy script to clipboard
