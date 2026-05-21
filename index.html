@@ -1223,10 +1223,18 @@ function renderTable(tableId){
     // Collect unique values per column for dropdowns
     const uniqueMap = {};
     def.columns.forEach(col => { if(col.key !== 'idx') uniqueMap[col.key] = new Set(); });
+    const regDataForUnique = lsGet('regData', []);
     data.forEach(row => {
       def.columns.forEach(col => {
-        if(col.key !== 'idx' && row[col.key] !== undefined && row[col.key] !== ''){
-          uniqueMap[col.key].add(String(row[col.key]));
+        if(col.key === 'idx') return;
+        let val = row[col.key];
+        // Resolve linkPerson index to nickname
+        if(col.type === 'linkPerson' && val !== undefined && val !== ''){
+          const idx = parseInt(val);
+          val = (!isNaN(idx) && regDataForUnique[idx]) ? regDataForUnique[idx].nickname : '';
+        }
+        if(val !== undefined && val !== ''){
+          uniqueMap[col.key].add(String(val));
         }
       });
     });
@@ -1330,6 +1338,14 @@ function renderTable(tableId){
           else if(col.type === 'computed-taskname') cellVal = computeTaskName(row);
           else if(col.type === 'computed-interval') cellVal = computeInterval(row.lastDate);
           else if(col.type === 'computed-next') cellVal = computeNextDate(row.lastDate);
+          else if(col.type === 'linkPerson'){
+            const regData = lsGet('regData', []);
+            const idx = parseInt(row.linkPerson);
+            cellVal = (!isNaN(idx) && regData[idx]) ? (regData[idx].nickname || '') : '';
+          }
+          else if(col.type === 'linkPeriod'){
+            cellVal = row.period || '';
+          }
           else cellVal = String(row[key] || '');
         } else {
           cellVal = String(row[key] || '');
