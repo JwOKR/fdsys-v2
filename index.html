@@ -451,10 +451,11 @@
       <div class="sub-pn" id="sp1">
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
           <button class="btn btn-accent btn-sm" onclick="addRow('wfPubTable')">+ 新增任务</button>
+          <button class="btn btn-sm" onclick="showBulkImport()">📋 批量新增</button>
         </div>
         <div class="cd-b">
           <table id="wfPubTable">
-            <thead><tr><th style="width:40px">#</th><th>期数</th><th>发布日期</th><th>商品名称</th><th>产品编号</th><th>淘口令</th><th>商品价格</th><th>基础佣金</th><th>晒单奖励</th><th>限接人数</th><th>已接人数</th><th>剩余名额</th><th>状态</th><th style="width:50px">操作</th></tr></thead>
+            <thead><tr><th style="width:40px">#</th><th>任务名</th><th>发布日期</th><th>商品名称</th><th>产品编号</th><th>淘口令</th><th>商品价格</th><th>基础佣金</th><th>晒单奖励</th><th>限接人数</th><th>已接人数</th><th>剩余名额</th><th>状态</th><th style="width:50px">操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -1046,7 +1047,7 @@ const TABLE_DEFS = {
     storageKey: 'wfPubData',
     columns: [
       { key:'idx', label:'#', type:'auto', width:40 },
-      { key:'period', label:'期数', type:'text' },
+      { key:'taskName', label:'任务名', type:'computed-taskname' },
       { key:'date', label:'发布日期', type:'date' },
       { key:'product', label:'商品名称', type:'text' },
       { key:'productCode', label:'产品编号', type:'text' },
@@ -1055,11 +1056,11 @@ const TABLE_DEFS = {
       { key:'commission', label:'基础佣金', type:'text' },
       { key:'bonus', label:'晒单奖励', type:'text' },
       { key:'limit', label:'限接人数', type:'text' },
-      { key:'joined', label:'已接人数', type:'text' },
-      { key:'remain', label:'剩余名额', type:'text' },
-      { key:'status', label:'状态', type:'status', options:['未开始','进行中','已结束','已取消'] }
+      { key:'joined', label:'已接人数', type:'computed-joined' },
+      { key:'remain', label:'剩余名额', type:'computed-remain' },
+      { key:'status', label:'状态', type:'computed-status' }
     ],
-    empty: { period:'',date:'',product:'',productCode:'',taoCode:'',price:'',commission:'',bonus:'+¥3.00',limit:'',joined:'0',remain:'',status:'未开始' }
+    empty: { date: new Date().toISOString().split('T')[0], product:'',productCode:'',taoCode:'',price:'',commission:'',bonus:'+¥3.00',limit:'', status:'未开始' }
   },
   wfDetailTable: {
     storageKey: 'wfDetailData',
@@ -1231,25 +1232,26 @@ function renderTable(tableId){
         // 期数下拉，从任务发布表拉取
         const sel = document.createElement('select');
         sel.className = 'inline-select';
-        sel.style.minWidth = '100px';
+        sel.style.minWidth = '120px';
         const defaultOpt = document.createElement('option');
-        defaultOpt.value = ''; defaultOpt.textContent = '-- 选择期数 --';
+        defaultOpt.value = ''; defaultOpt.textContent = '-- 选择任务 --';
         sel.appendChild(defaultOpt);
         const pubData = lsGet('wfPubData', []);
         pubData.forEach((pub, pubIdx) => {
+          const taskName = computeTaskName(pub);
           const o = document.createElement('option');
-          o.value = pub.period || '';
-          o.textContent = (pub.period || '第' + (pubIdx+1) + '期') + (pub.product ? ' - ' + pub.product : '');
-          if(row.period && row.period === pub.period) o.selected = true;
+          o.value = taskName;
+          o.textContent = taskName + (pub.product ? ' - ' + pub.product : '');
+          if(row.period && row.period === taskName) o.selected = true;
           sel.appendChild(o);
         });
         sel.dataset.row = ri;
         sel.dataset.key = col.key;
         sel.addEventListener('change', function(){
-          const selectedPeriod = this.value;
-          saveCell(tableId, ri, 'period', selectedPeriod);
-          if(selectedPeriod){
-            const pub = pubData.find(p => p.period === selectedPeriod);
+          const selectedTask = this.value;
+          saveCell(tableId, ri, 'period', selectedTask);
+          if(selectedTask){
+            const pub = pubData.find(p => computeTaskName(p) === selectedTask);
             if(pub){
               // Auto-fill from pubData
               saveCell(tableId, ri, 'product', pub.product || '');
@@ -1285,6 +1287,25 @@ function renderTable(tableId){
         td.innerHTML = canJoin
           ? '<span class="b b-g"><span class="b-i"></span>✅ 可接</span>'
           : '<span class="b b-r"><span class="b-i"></span>❌ 未满（差' + (12 - daysDiff(row.lastDate)) + '天）</span>';
+      } else if(col.type === 'computed-taskname'){
+        td.textContent = computeTaskName(row);
+        td.style.fontFamily = 'var(--mono)';
+        td.style.fontSize = '11.5px';
+        td.style.color = 'var(--accent)';
+      } else if(col.type === 'computed-joined'){
+        td.textContent = computeJoined(row);
+        td.style.fontFamily = 'var(--mono)';
+      } else if(col.type === 'computed-remain'){
+        const v = computeRemain(row);
+        td.textContent = v;
+        td.style.fontFamily = 'var(--mono)';
+        if(v === '0') td.style.color = 'var(--red)';
+      } else if(col.type === 'computed-status'){
+        const s = computeTaskStatus(row);
+        td.textContent = s;
+        if(s === '已满员') td.innerHTML = '<span class="b b-g"><span class="b-i"></span>' + s + '</span>';
+        else if(s === '进行中') td.innerHTML = '<span class="b b-a"><span class="b-i"></span>' + s + '</span>';
+        else if(s === '未开始') td.innerHTML = '<span class="b b-y"><span class="b-i"></span>' + s + '</span>';
       }
       tr.appendChild(td);
     });
@@ -1471,6 +1492,37 @@ function computeCanJoin(dateStr){
 }
 
 // ─────────────────────────────────────────────
+// Computed fields for task (wfPubTable)
+// ─────────────────────────────────────────────
+function computeTaskName(row){
+  const date = row.date || '';
+  const code = row.productCode || '';
+  if(!date && !code) return '-';
+  return date + (code ? '_' + code : '');
+}
+function computeJoined(row){
+  const details = lsGet('wfDetailData', []);
+  const taskName = computeTaskName(row);
+  if(taskName === '-') return '0';
+  const count = details.filter(d => d.period === taskName).length;
+  return String(count);
+}
+function computeRemain(row){
+  const limit = parseInt(row.limit) || 0;
+  const joined = parseInt(computeJoined(row)) || 0;
+  if(!limit) return '-';
+  return String(Math.max(0, limit - joined));
+}
+function computeTaskStatus(row){
+  const limit = parseInt(row.limit) || 0;
+  const joined = parseInt(computeJoined(row)) || 0;
+  if(!limit) return row.status || '未开始';
+  if(joined >= limit) return '已满员';
+  if(joined > 0) return '进行中';
+  return '未开始';
+}
+
+// ─────────────────────────────────────────────
 // Stats bar
 // ─────────────────────────────────────────────
 function updateStats(){
@@ -1493,6 +1545,54 @@ function updateStats(){
     <div class="st"><div class="st-i" style="background:var(--blue-bg);color:var(--blue)">🔑</div><div><div class="st-l">可用关键词</div><div class="st-v" style="color:var(--blue)">${kwAvail}</div></div></div>
     <div class="st"><div class="st-i" style="background:var(--purple-bg);color:var(--purple)">🎁</div><div><div class="st-l">福利任务期</div><div class="st-v" style="color:var(--purple)">${wfPub.length}</div></div></div>
   `;
+}
+
+// ─────────────────────────────────────────────
+// Bulk import tasks
+// ─────────────────────────────────────────────
+function showBulkImport(){
+  const html = `
+    <div style="margin-bottom:12px">
+      <p style="color:var(--text-2);font-size:13px;margin-bottom:8px">每行一个产品编号，自动创建任务（任务名 = 今天日期_产品编号）</p>
+      <textarea id="bulkCodes" rows="8" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:var(--mono);font-size:13px;resize:vertical" placeholder="例如：\nSP2026001\nSP2026002\nSP2026003"></textarea>
+    </div>
+  `;
+  openModal('📋 批量新增任务', html,
+    '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-accent" onclick="doBulkImport()">确认导入</button>'
+  );
+}
+
+function doBulkImport(){
+  const textarea = document.getElementById('bulkCodes');
+  if(!textarea) return;
+  const codes = textarea.value.split('\n').map(s => s.trim()).filter(Boolean);
+  if(codes.length === 0){ toast('⚠️ 请输入产品编号', 'warning'); return; }
+  const today = new Date().toISOString().split('T')[0];
+  const pubData = lsGet('wfPubData', []);
+  let added = 0;
+  codes.forEach(code => {
+    // Check duplicate
+    const exists = pubData.some(p => p.productCode === code && p.date === today);
+    if(exists) return;
+    pubData.push({
+      date: today,
+      product: '',
+      productCode: code,
+      taoCode: '',
+      price: '',
+      commission: '',
+      bonus: '+¥3.00',
+      limit: '',
+      status: '未开始'
+    });
+    added++;
+  });
+  lsSet('wfPubData', pubData);
+  renderTable('wfPubTable');
+  closeModal();
+  updateStats();
+  debouncePush();
+  toast('✅ 已导入 ' + added + ' 个任务' + (added < codes.length ? '（跳过 ' + (codes.length - added) + ' 个重复）' : ''));
 }
 
 // ─────────────────────────────────────────────
