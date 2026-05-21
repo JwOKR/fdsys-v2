@@ -283,6 +283,14 @@
     .sync-bar{flex-direction:column;align-items:flex-start}
     .sync-actions{width:100%}
   }
+
+  /* Sub-tabs for inline table switching */
+  .sub-tabs{display:flex;gap:4px;padding:12px 20px 0;border-bottom:1px solid var(--border);overflow-x:auto}
+  .sub-tab{padding:8px 16px;font-size:12.5px;font-weight:600;color:var(--text-4);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;border-radius:6px 6px 0 0;transition:all .2s}
+  .sub-tab:hover{color:var(--text-2);background:var(--hover)}
+  .sub-tab.on{color:var(--accent);border-bottom-color:var(--accent);background:var(--accent-glow)}
+  .sub-pn{display:none}
+  .sub-pn.on{display:block}
 </style>
 </head>
 <body>
@@ -413,21 +421,69 @@
   <!-- ╚══════════════════════════════════════════╝ -->
   <div class="pn" id="p1">
 
-    <!-- 接单人登记表 -->
-    <div class="cd">
-      <div class="cd-h">
-        <div class="cd-hl"><div class="cd-dot" style="background:var(--accent)"></div><h3>接单人登记表</h3><span class="sub">· 点击单元格可编辑 · 悬停行显示操作按钮</span></div>
-        <div class="cd-hr">
+    <!-- ═══ 四表合一模块 ═══ -->
+    <div class="cd" style="padding:0;overflow:visible">
+      <div class="cd-h" style="margin:0;padding:14px 20px 0">
+        <div class="cd-hl"><div class="cd-dot" style="background:var(--accent)"></div><h3>数据管理中心</h3><span class="sub">· 四表联动 · 新增自动关联</span></div>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab on" onclick="switchSubTab(0)">📋 接单人登记</button>
+        <button class="sub-tab" onclick="switchSubTab(1)">📦 任务发布管理</button>
+        <button class="sub-tab" onclick="switchSubTab(2)">📝 接单明细</button>
+        <button class="sub-tab" onclick="switchSubTab(3)">📅 间隔管理</button>
+      </div>
+
+      <!-- 子面板 0: 接单人登记表 -->
+      <div class="sub-pn on" id="sp0">
+        <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
           <button class="btn btn-accent btn-sm" onclick="addRow('regTable')">+ 新增接单人</button>
         </div>
+        <div class="cd-b">
+          <table id="regTable">
+            <thead><tr><th style="width:40px">#</th><th>接单人昵称</th><th>联系方式</th><th>账号等级</th><th>88VIP</th><th>芝麻信用</th><th>近30天同类目</th><th>所在城市</th><th>放单日期</th><th>商品名称</th><th>关键词</th><th>订单编号</th><th>拍下金额</th><th>佣金</th><th>快递单号</th><th>签收状态</th><th>确认收货</th><th>好评</th><th>佣金结算</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="nt"><span class="nt-ico">💡</span><span>状态列可点击切换 · 点击单元格可直接编辑 · 新增接单人自动同步到间隔管理表</span></div>
       </div>
-      <div class="cd-b">
-        <table id="regTable">
-          <thead><tr><th style="width:40px">#</th><th>接单人昵称</th><th>联系方式</th><th>账号等级</th><th>88VIP</th><th>芝麻信用</th><th>近30天同类目</th><th>所在城市</th><th>放单日期</th><th>商品名称</th><th>关键词</th><th>订单编号</th><th>拍下金额</th><th>佣金</th><th>快递单号</th><th>签收状态</th><th>确认收货</th><th>好评</th><th>佣金结算</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
-          <tbody></tbody>
-        </table>
+
+      <!-- 子面板 1: 福利任务发布管理表 -->
+      <div class="sub-pn" id="sp1">
+        <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
+          <button class="btn btn-accent btn-sm" onclick="addRow('wfPubTable')">+ 新增任务</button>
+        </div>
+        <div class="cd-b">
+          <table id="wfPubTable">
+            <thead><tr><th style="width:40px">#</th><th>期数</th><th>发布日期</th><th>商品名称</th><th>淘口令</th><th>商品价格</th><th>基础佣金</th><th>晒单奖励</th><th>限接人数</th><th>已接人数</th><th>剩余名额</th><th>状态</th><th style="width:50px">操作</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
-      <div class="nt"><span class="nt-ico">💡</span><span>状态列可点击切换：签收（未发货/运输中/已签收）· 确认收货（未确认/已确认）· 好评（未评价/已好评/已晒图）· 佣金（未结/已结/已拒付）· 点击单元格可直接编辑</span></div>
+
+      <!-- 子面板 2: 接单明细表 -->
+      <div class="sub-pn" id="sp2">
+        <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
+          <button class="btn btn-accent btn-sm" onclick="addRow('wfDetailTable')">+ 新增接单</button>
+        </div>
+        <div class="cd-b">
+          <table id="wfDetailTable">
+            <thead><tr><th style="width:40px">#</th><th>期数</th><th>接单日期</th><th><span style="color:var(--accent)">选择接单人</span></th><th>淘宝昵称</th><th>联系方式</th><th>下单时间</th><th>订单编号</th><th>实付</th><th>快递单号</th><th>签收</th><th>确认收货</th><th>好评</th><th>晒单</th><th>基础返款</th><th>晒单奖</th><th>总返款</th><th>返款日期</th><th>付款方式</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="nt"><span class="nt-ico">🔗</span><span>联动功能：从「选择接单人」下拉框选择已登记的接单人，自动填充昵称和联系方式 · 新增接单自动更新间隔管理表和发布管理表</span></div>
+      </div>
+
+      <!-- 子面板 3: 接单间隔管理表 -->
+      <div class="sub-pn" id="sp3">
+        <div class="cd-b">
+          <table id="wfIntervalTable">
+            <thead><tr><th style="width:40px">#</th><th>淘宝昵称</th><th>上次接单日期</th><th>上次期数</th><th>距今天数</th><th>间隔要求</th><th>下次可接日期</th><th>是否可接</th><th style="width:50px">操作</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="nt"><span class="nt-ico">📅</span><span>间隔公式：距今天数 = 今天 - 上次接单日期 · ≥ 12 → 可接 · < 12 → 需等待 (12 - 距今天数) 天</span></div>
+      </div>
     </div>
 
     <!-- 接单人筛选标准 -->
@@ -561,54 +617,6 @@
         </div>
       </div>
       <div class="nt"><span class="nt-ico">📸</span><span>完成后需提交截图：① 订单详情页 ② 好评截图（如已评价）</span></div>
-    </div>
-
-    <!-- 福利任务发布管理表 -->
-    <div class="cd">
-      <div class="cd-h">
-        <div class="cd-hl"><div class="cd-dot" style="background:var(--yellow)"></div><h3>福利任务发布管理表</h3><span class="sub">· 每期任务总览</span></div>
-        <div class="cd-hr">
-          <button class="btn btn-accent btn-sm" onclick="addRow('wfPubTable')">+ 新增任务</button>
-        </div>
-      </div>
-      <div class="cd-b">
-        <table id="wfPubTable">
-          <thead><tr><th style="width:40px">#</th><th>期数</th><th>发布日期</th><th>商品名称</th><th>淘口令</th><th>商品价格</th><th>基础佣金</th><th>晒单奖励</th><th>限接人数</th><th>已接人数</th><th>剩余名额</th><th>状态</th><th style="width:50px">操作</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- 接单明细表（联动版） -->
-    <div class="cd">
-      <div class="cd-h">
-        <div class="cd-hl"><div class="cd-dot" style="background:var(--blue)"></div><h3>福利任务 · 接单明细表</h3><span class="sub">· 选择接单人自动填充信息</span></div>
-        <div class="cd-hr">
-          <button class="btn btn-accent btn-sm" onclick="addRow('wfDetailTable')">+ 新增接单</button>
-        </div>
-      </div>
-      <div class="cd-b">
-        <table id="wfDetailTable">
-          <thead><tr><th style="width:40px">#</th><th>期数</th><th>接单日期</th><th><span style="color:var(--accent)">选择接单人</span></th><th>淘宝昵称</th><th>联系方式</th><th>下单时间</th><th>订单编号</th><th>实付</th><th>快递单号</th><th>签收</th><th>确认收货</th><th>好评</th><th>晒单</th><th>基础返款</th><th>晒单奖</th><th>总返款</th><th>返款日期</th><th>付款方式</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="nt"><span class="nt-ico">🔗</span><span>联动功能：从「选择接单人」下拉框选择已登记的接单人，自动填充淘宝昵称和联系方式 · 晒单奖励默认3元 · 总返款 = 基础佣金 + 晒单奖励</span></div>
-    </div>
-
-    <!-- 接单间隔管理 -->
-    <div class="cd">
-      <div class="cd-h">
-        <div class="cd-hl"><div class="cd-dot" style="background:var(--purple)"></div><h3>接单间隔管理表</h3><span class="sub">· 核心规则：两次接单间隔 ≥ 12天</span></div>
-        <span class="b b-p"><span class="b-i"></span>间隔管控</span>
-      </div>
-      <div class="cd-b">
-        <table id="wfIntervalTable">
-          <thead><tr><th style="width:40px">#</th><th>淘宝昵称</th><th>上次接单日期</th><th>上次期数</th><th>距今天数</th><th>间隔要求</th><th>下次可接日期</th><th>是否可接</th><th style="width:50px">操作</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="nt"><span class="nt-ico">📅</span><span>间隔公式：距今天数 = 今天 - 上次接单日期 · ≥ 12 → 可接 · < 12 → 需等待 (12 - 距今天数) 天</span></div>
     </div>
 
     <!-- 福利任务检查流程 -->
@@ -862,6 +870,14 @@ function go(i){
   document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('on',j===i));
   document.querySelectorAll('.pn').forEach((p,j)=>p.classList.toggle('on',j===i));
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─────────────────────────────────────────────
+// Sub-tab switching (4-table module)
+// ─────────────────────────────────────────────
+function switchSubTab(i){
+  document.querySelectorAll('.sub-tab').forEach((t,j)=>t.classList.toggle('on',j===i));
+  document.querySelectorAll('.sub-pn').forEach((p,j)=>p.classList.toggle('on',j===i));
 }
 
 // ─────────────────────────────────────────────
@@ -1192,6 +1208,8 @@ function renderTable(tableId){
               if(cell.dataset.key === 'nickname') cell.textContent = reg.nickname || '';
               if(cell.dataset.key === 'contact') cell.textContent = reg.contact || '';
             });
+            // Auto-sync to interval table
+            syncIntervalFromDetail(reg.nickname || '', row.date || '', row.period || '');
             toast('✅ 已自动填充：' + (reg.nickname||''));
           }
         });
@@ -1233,6 +1251,14 @@ function saveCell(tableId, rowIdx, key, value){
     lsSet(def.storageKey, data);
     updateStats();
     debouncePush();
+    // Auto-sync hooks
+    if(tableId === 'regTable' && key === 'nickname'){
+      syncIntervalFromReg(value);
+    }
+    if(tableId === 'wfDetailTable' && (key === 'nickname' || key === 'date')){
+      const row = data[rowIdx];
+      if(row.nickname) syncIntervalFromDetail(row.nickname, row.date || '', row.period || '');
+    }
   }
 }
 
@@ -1245,6 +1271,11 @@ function addRow(tableId){
   updateStats();
   debouncePush();
   toast('✅ 已新增一行');
+  // Auto-association: regTable → wfIntervalTable
+  if(tableId === 'regTable'){
+    // Will sync after user fills in nickname
+    toast('💡 提示：填写昵称后可在间隔管理表中自动同步', 'info');
+  }
 }
 
 function deleteRow(tableId, rowIdx){
@@ -1263,6 +1294,42 @@ function confirmDelete(tableId, rowIdx){
   closeModal();
   debouncePush();
   toast('🗑 已删除');
+}
+
+// ─────────────────────────────────────────────
+// Auto-sync: interval table ↔ detail/reg tables
+// ─────────────────────────────────────────────
+function syncIntervalFromDetail(nickname, date, period){
+  if(!nickname) return;
+  const intervals = lsGet('wfIntervalData', []);
+  const existIdx = intervals.findIndex(r => r.nickname === nickname);
+  if(existIdx >= 0){
+    // Update existing entry
+    if(date) intervals[existIdx].lastDate = date;
+    if(period) intervals[existIdx].lastPeriod = period;
+    lsSet('wfIntervalData', intervals);
+    renderTable('wfIntervalTable');
+    toast('📅 已同步间隔管理：' + nickname);
+  } else {
+    // Create new entry
+    intervals.push({ nickname:nickname, lastDate:date||'', lastPeriod:period||'' });
+    lsSet('wfIntervalData', intervals);
+    renderTable('wfIntervalTable');
+    toast('📅 已新增间隔记录：' + nickname);
+  }
+  debouncePush();
+}
+
+function syncIntervalFromReg(nickname){
+  if(!nickname) return;
+  const intervals = lsGet('wfIntervalData', []);
+  const exist = intervals.some(r => r.nickname === nickname);
+  if(!exist){
+    intervals.push({ nickname:nickname, lastDate:'', lastPeriod:'' });
+    lsSet('wfIntervalData', intervals);
+    renderTable('wfIntervalTable');
+    debouncePush();
+  }
 }
 
 // ─────────────────────────────────────────────
