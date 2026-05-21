@@ -480,7 +480,7 @@
         </div>
         <div class="cd-b">
           <table id="wfPubTable">
-            <thead><tr><th style="width:40px">#</th><th>任务名</th><th>发布日期</th><th>商品名称</th><th>产品编号</th><th>淘口令</th><th>商品价格</th><th>基础佣金</th><th>晒单奖励</th><th>限接人数</th><th>已接人数</th><th>剩余名额</th><th>状态</th><th>快速接单</th><th style="width:50px">操作</th></tr></thead>
+            <thead><tr><th style="width:40px">#</th><th>任务名</th><th>发布日期</th><th>商品ID</th><th>产品编号</th><th>淘口令</th><th>商品价格</th><th>基础佣金</th><th>晒单奖励</th><th>限接人数</th><th>已接人数</th><th>剩余名额</th><th>状态</th><th>快速接单</th><th style="width:50px">操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -494,11 +494,11 @@
         </div>
         <div class="cd-b">
           <table id="wfDetailTable">
-            <thead><tr><th style="width:40px">#</th><th>期数</th><th>接单日期</th><th><span style="color:var(--accent)">选择接单人</span></th><th>淘宝昵称</th><th>微信名</th><th>联系方式</th><th>商品名称</th><th>产品编号</th><th>下单时间</th><th>订单编号</th><th>实付</th><th>快递单号</th><th>签收</th><th>确认收货</th><th>好评</th><th>晒单</th><th>基础返款</th><th>晒单奖</th><th>总返款</th><th>返款日期</th><th>付款方式</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
+            <thead><tr><th style="width:40px">#</th><th>期数</th><th>接单日期</th><th><span style="color:var(--accent)">选择接单人</span></th><th>淘宝昵称</th><th>微信名</th><th>联系方式</th><th>商品ID</th><th>产品编号</th><th>下单时间</th><th>订单编号</th><th>实付</th><th>快递单号</th><th>签收</th><th>确认收货</th><th>好评</th><th>晒单</th><th>基础返款</th><th>晒单奖</th><th>总返款</th><th>返款日期</th><th>付款方式</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
-        <div class="nt"><span class="nt-ico">🔗</span><span>联动功能：选择「期数」自动关联任务（商品名称、产品编号、基础返款、晒单奖） · 选择「接单人」自动填充（淘宝昵称、微信名、联系方式）</span></div>
+        <div class="nt"><span class="nt-ico">🔗</span><span>联动功能：选择「期数」自动关联任务（商品ID、产品编号、基础返款、晒单奖） · 选择「接单人」自动填充（淘宝昵称、微信名、联系方式）</span></div>
       </div>
 
       <!-- 子面板 3: 接单间隔管理表 -->
@@ -1129,7 +1129,7 @@ var TABLE_DEFS = {
       { key:'idx', label:'#', type:'auto', width:40 },
       { key:'taskName', label:'任务名', type:'computed-taskname' },
       { key:'date', label:'发布日期', type:'date' },
-      { key:'product', label:'商品名称', type:'text' },
+      { key:'product', label:'商品ID', type:'text' },
       { key:'productCode', label:'产品编号', type:'text' },
       { key:'taoCode', label:'淘口令', type:'text' },
       { key:'price', label:'商品价格', type:'text' },
@@ -1153,7 +1153,7 @@ var TABLE_DEFS = {
       { key:'nickname', label:'淘宝昵称', type:'text' },
       { key:'wechatName', label:'微信名', type:'text' },
       { key:'contact', label:'联系方式', type:'text' },
-      { key:'product', label:'商品名称', type:'text', readonly:true },
+      { key:'product', label:'商品ID', type:'text', readonly:true },
       { key:'productCode', label:'产品编号', type:'text', readonly:true },
       { key:'orderTime', label:'下单时间', type:'text' },
       { key:'orderId', label:'订单编号', type:'text' },
