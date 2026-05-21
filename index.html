@@ -1198,6 +1198,7 @@ function renderTable(tableId){
   const def = TABLE_DEFS[tableId];
   if(!def) return;
   isRendering = true;
+  try {
   const data = lsGet(def.storageKey, []);
   const tbody = document.querySelector('#' + tableId + ' tbody');
   if(!tbody) return;
@@ -1458,7 +1459,7 @@ function renderTable(tableId){
     tr.appendChild(actTd);
     tbody.appendChild(tr);
   });
-  isRendering = false;
+  } finally { isRendering = false; }
 }
 
 // ─── 筛选功能 ──────────────────────────────
