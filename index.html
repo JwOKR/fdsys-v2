@@ -1007,10 +1007,10 @@ function escHtml(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// Load saved theme (must be after LS_PREFIX is defined)
+// Load saved theme (must be after LS_PREFIX is defined) — default: light
 (function(){
   const saved = localStorage.getItem(LS_PREFIX + 'theme');
-  if(saved === 'light'){
+  if(saved !== 'dark'){
     document.documentElement.classList.add('light');
     updateThemeBtn(true);
   }
