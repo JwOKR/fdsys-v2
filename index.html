@@ -1197,6 +1197,7 @@ var TABLE_DEFS = {
 function renderTable(tableId){
   const def = TABLE_DEFS[tableId];
   if(!def) return;
+  isRendering = true;
   const data = lsGet(def.storageKey, []);
   const tbody = document.querySelector('#' + tableId + ' tbody');
   if(!tbody) return;
@@ -1457,6 +1458,7 @@ function renderTable(tableId){
     tr.appendChild(actTd);
     tbody.appendChild(tr);
   });
+  isRendering = false;
 }
 
 // ─── 筛选功能 ──────────────────────────────
@@ -1479,7 +1481,7 @@ function saveCell(tableId, rowIdx, key, value){
     data[rowIdx][key] = value;
     lsSet(def.storageKey, data);
     updateStats();
-    debouncePush();
+    if(!isRendering) debouncePush();
     // Auto-sync hooks
     if(tableId === 'regTable' && key === 'nickname'){
       syncIntervalFromReg(value);
@@ -1874,6 +1876,7 @@ let cloudPat = localStorage.getItem(CLOUD_PREFIX + 'pat') || '';
 let gistId = localStorage.getItem(CLOUD_PREFIX + 'gistId') || '';
 let syncTimer = null;
 let isSyncing = false;
+let isRendering = false; // guard: skip saveCell debouncePush during renderTable
 
 function getCloudConfig(){ return { pat: cloudPat, gistId: gistId }; }
 function setCloudConfig(pat, gid){ cloudPat=pat; gistId=gid; localStorage.setItem(CLOUD_PREFIX+'pat',pat); localStorage.setItem(CLOUD_PREFIX+'gistId',gid); }
