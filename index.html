@@ -1204,6 +1204,14 @@ function renderTable(tableId){
   // Build filter row (always rebuild to reflect latest data)
   const thead = document.querySelector('#' + tableId + ' thead');
   if(thead){
+    // Save current filter values before rebuilding
+    const savedFilters = {};
+    thead.querySelectorAll('.filter-row select').forEach(sel => {
+      if(sel.value) savedFilters[sel.dataset.colKey] = sel.value;
+    });
+    thead.querySelectorAll('.filter-row input').forEach(input => {
+      if(input.value) savedFilters[input.dataset.colKey] = input.value;
+    });
     const existingFilter = thead.querySelector('.filter-row');
     if(existingFilter) existingFilter.remove();
     const filterTr = document.createElement('tr');
@@ -1281,6 +1289,16 @@ function renderTable(tableId){
     actTd.style.width = '50px';
     filterTr.appendChild(actTd);
     thead.appendChild(filterTr);
+    // Restore saved filter values
+    thead.querySelectorAll('.filter-row select').forEach(sel => {
+      if(savedFilters[sel.dataset.colKey]){
+        sel.value = savedFilters[sel.dataset.colKey];
+        sel.classList.add('f-active');
+      }
+    });
+    thead.querySelectorAll('.filter-row input').forEach(input => {
+      if(savedFilters[input.dataset.colKey]) input.value = savedFilters[input.dataset.colKey];
+    });
   }
 
   // Get filter values
