@@ -1216,10 +1216,6 @@ function renderTable(tableId){
     if(existingFilter) existingFilter.remove();
     const filterTr = document.createElement('tr');
     filterTr.className = 'filter-row';
-    // Empty cell for # column
-    const emptyTd = document.createElement('td');
-    emptyTd.style.width = '40px';
-    filterTr.appendChild(emptyTd);
     // Collect unique values per column for dropdowns
     const uniqueMap = {};
     def.columns.forEach(col => { if(col.key !== 'idx') uniqueMap[col.key] = new Set(); });
