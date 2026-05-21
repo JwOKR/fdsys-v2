@@ -37,7 +37,52 @@
     --sans: 'Noto Sans SC', -apple-system, sans-serif;
     --radius: 14px;
     --radius-sm: 8px;
+    --hover: rgba(255,255,255,0.04);
   }
+  /* Light mode */
+  :root.light {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --surface-2: #f0f0f2;
+    --surface-3: #e8e8ea;
+    --border: #d0d0d5;
+    --accent: #ff6b35;
+    --accent-light: #e85d2c;
+    --accent-glow: rgba(255,107,53,0.08);
+    --green: #059669;
+    --green-bg: rgba(5,150,105,0.08);
+    --red: #dc2626;
+    --red-bg: rgba(220,38,38,0.08);
+    --yellow: #d97706;
+    --yellow-bg: rgba(217,119,6,0.08);
+    --blue: #2563eb;
+    --blue-bg: rgba(37,99,235,0.08);
+    --purple: #7c3aed;
+    --purple-bg: rgba(124,58,237,0.08);
+    --cyan: #0891b2;
+    --cyan-bg: rgba(8,145,178,0.08);
+    --pink: #db2777;
+    --pink-bg: rgba(219,39,119,0.08);
+    --text: #1a1a2e;
+    --text-2: #4a4a6a;
+    --text-3: #8a8aa0;
+    --text-4: #b0b0c0;
+    --hover: rgba(0,0,0,0.04);
+  }
+  :root.light body::before{background:radial-gradient(ellipse at 8% 15%,rgba(255,107,53,0.05) 0%,transparent 55%),radial-gradient(ellipse at 92% 85%,rgba(96,165,250,0.04) 0%,transparent 55%),radial-gradient(ellipse at 50% 50%,rgba(167,139,250,0.03) 0%,transparent 60%)}
+  :root.light .hdr h1{background:linear-gradient(135deg,#1a1a2e,var(--accent-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  :root.light .hdr-logo{box-shadow:0 4px 20px rgba(255,107,53,0.3)}
+  :root.light .cd{background:var(--surface);border-color:var(--border)}
+  :root.light .sb{background:var(--surface-2);border-color:var(--border)}
+  :root.light .copy-btn{background:var(--surface-3);border-color:var(--border)}
+  :root.light .copy-btn:hover{background:var(--accent-glow);color:var(--accent);border-color:var(--accent)}
+  :root.light input, :root.light select, :root.light textarea{background:var(--surface);border-color:var(--border);color:var(--text)}
+  :root.light .inline-select{background:var(--surface-2);border-color:var(--border)}
+  :root.light table th{background:var(--surface-2);border-color:var(--border)}
+  :root.light table td{border-color:var(--border)}
+  :root.light .empty-row td{color:var(--text-3)}
+  :root.light .sync-bar{background:var(--surface);border-color:var(--border)}
+  :root.light .nt{background:var(--surface-2);border-color:var(--border)}
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;line-height:1.6}
@@ -310,6 +355,7 @@
       <div class="hdr-sub">话术 · 登记 · 检查 · 催收 · 异常 · 关键词 · 福利任务 &mdash; 全模块整合 · 数据可编辑 · 云端永久存储</div>
     </div>
     <div class="hdr-right">
+      <button class="btn btn-sm" id="themeToggle" onclick="toggleTheme()" title="切换明亮/暗黑模式">🌙 暗黑</button>
       <button class="btn btn-sm btn-green" onclick="exportExcel()" title="合并导出所有表格为Excel文件">📊 导出Excel</button>
       <button class="btn btn-sm" onclick="exportData()" title="导出JSON文件到本地">📥 导出</button>
       <button class="btn btn-sm" onclick="document.getElementById('importFile').click()" title="从JSON文件恢复">📤 导入</button>
@@ -336,8 +382,8 @@
 
   <!-- ═══ Tabs ═══ -->
   <div class="tabs" id="tabs">
-    <button class="tab on" onclick="go(0)">放单话术</button>
-    <button class="tab" onclick="go(1)">登记与福利<b style="background:var(--accent-glow);color:var(--accent)">联动</b></button>
+    <button class="tab" onclick="go(0)">放单话术</button>
+    <button class="tab on" onclick="go(1)">登记与福利<b style="background:var(--accent-glow);color:var(--accent)">联动</b></button>
     <button class="tab" onclick="go(2)">检查流程</button>
     <button class="tab" onclick="go(3)">催收货流程</button>
     <button class="tab" onclick="go(4)">异常处理</button>
@@ -347,7 +393,7 @@
   <!-- ╔══════════════════════════════════════════╗ -->
   <!-- ║          PANEL 0 · 放单话术              ║ -->
   <!-- ╚══════════════════════════════════════════╝ -->
-  <div class="pn on" id="p0">
+  <div class="pn" id="p0">
 
     <div class="cd">
       <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--accent)"></div><h3>淘宝C店放单话术</h3><span class="sub">· 邀约 → 说明 → 假聊 → 好评</span></div><span class="b b-b"><span class="b-i"></span>淘宝C店</span></div>
@@ -426,7 +472,7 @@
   <!-- ╔══════════════════════════════════════════╗ -->
   <!-- ║          PANEL 1 · 登记与福利（联动）    ║ -->
   <!-- ╚══════════════════════════════════════════╝ -->
-  <div class="pn" id="p1">
+  <div class="pn on" id="p1">
 
     <!-- ═══ 四表合一模块 ═══ -->
     <div class="cd" style="padding:0;overflow:visible">
@@ -889,6 +935,28 @@ function go(i){
   document.querySelectorAll('.pn').forEach((p,j)=>p.classList.toggle('on',j===i));
   window.scrollTo({top:0,behavior:'smooth'});
 }
+
+// ─────────────────────────────────────────────
+// Theme toggle (Dark/Light)
+// ─────────────────────────────────────────────
+function toggleTheme(){
+  const root = document.documentElement;
+  const isLight = root.classList.toggle('light');
+  localStorage.setItem(LS_PREFIX + 'theme', isLight ? 'light' : 'dark');
+  updateThemeBtn(isLight);
+}
+function updateThemeBtn(isLight){
+  const btn = document.getElementById('themeToggle');
+  if(btn) btn.innerHTML = isLight ? '🌙 暗黑' : '☀️ 明亮';
+}
+// Load saved theme
+(function(){
+  const saved = localStorage.getItem(LS_PREFIX + 'theme');
+  if(saved === 'light'){
+    document.documentElement.classList.add('light');
+    updateThemeBtn(true);
+  }
+})();
 
 // ─────────────────────────────────────────────
 // Sub-tab switching (4-table module)
