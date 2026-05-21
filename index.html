@@ -510,7 +510,7 @@
         </div>
         <div class="cd-b">
           <table id="wfPubTable">
-            <thead><tr><th style="width:40px">#</th><th>任务名</th><th>发布日期</th><th>商品名称</th><th>产品编号</th><th>淘口令</th><th>商品价格</th><th>基础佣金</th><th>晒单奖励</th><th>限接人数</th><th>已接人数</th><th>剩余名额</th><th>状态</th><th style="width:50px">操作</th></tr></thead>
+            <thead><tr><th style="width:40px">#</th><th>任务名</th><th>发布日期</th><th>商品名称</th><th>产品编号</th><th>淘口令</th><th>商品价格</th><th>基础佣金</th><th>晒单奖励</th><th>限接人数</th><th>已接人数</th><th>剩余名额</th><th>状态</th><th>快速接单</th><th style="width:50px">操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -1141,7 +1141,8 @@ var TABLE_DEFS = {
       { key:'limit', label:'限接人数', type:'text' },
       { key:'joined', label:'已接人数', type:'computed-joined' },
       { key:'remain', label:'剩余名额', type:'computed-remain' },
-      { key:'status', label:'状态', type:'computed-status' }
+      { key:'status', label:'状态', type:'computed-status' },
+      { key:'quickAssign', label:'快速接单', type:'quickAssign' }
     ],
     empty: { date: new Date().toISOString().split('T')[0], product:'',productCode:'',taoCode:'',price:'',commission:'',bonus:'+¥3.00',limit:'', status:'未开始' }
   },
@@ -1450,6 +1451,13 @@ function renderTable(tableId){
         if(s === '已满员') td.innerHTML = '<span class="b b-g"><span class="b-i"></span>' + s + '</span>';
         else if(s === '进行中') td.innerHTML = '<span class="b b-a"><span class="b-i"></span>' + s + '</span>';
         else if(s === '未开始') td.innerHTML = '<span class="b b-y"><span class="b-i"></span>' + s + '</span>';
+      } else if(col.type === 'quickAssign'){
+        const taskStatus = computeTaskStatus(row);
+        if(taskStatus === '已满员'){
+          td.innerHTML = '<span style="color:var(--text-4);font-size:11px">已满</span>';
+        } else {
+          td.innerHTML = '<button class="btn btn-accent btn-sm" onclick="showQuickAssign('+ri+')" style="font-size:11px;padding:2px 8px">📋 接单</button>';
+        }
       }
       tr.appendChild(td);
     });
@@ -1527,6 +1535,126 @@ function confirmDelete(tableId, rowIdx){
   debouncePush();
   toast('🗑 已删除');
   // Auto-sync: rebuild interval table after detail/reg deletion
+  if(tableId === 'wfDetailTable' || tableId === 'regTable'){
+    rebuildIntervalTable();
+  }
+}
+
+// ── 快速接单：从任务发布表直接选择接单人，自动新增接单明细 ──
+function showQuickAssign(pubIdx){
+  const pubData = lsGet('wfPubData', []);
+  const pub = pubData[pubIdx];
+  if(!pub){ toast('任务不存在', 'error'); return; }
+  const regData = lsGet('regData', []);
+  if(regData.length === 0){ toast('请先在「接单人登记」中添加接单人', 'error'); return; }
+  const taskName = computeTaskName(pub);
+  const status = computeTaskStatus(pub);
+  if(status === '已满员'){ toast('该任务已满员', 'error'); return; }
+  // Build select options
+  let options = '<option value="">-- 选择接单人 --</option>';
+  regData.forEach((reg, idx) => {
+    options += '<option value="' + idx + '">' + (reg.nickname || '接单人#' + (idx+1)) + '</option>';
+  });
+  const remain = computeRemain(pub);
+  const remainText = remain === '-' ? '不限' : ('剩余 ' + remain + ' 个名额');
+  openModal('📋 快速接单 — ' + taskName,
+    '<div style="margin-bottom:12px">' +
+      '<p style="color:var(--text-2);font-size:13px;margin-bottom:4px"><strong>商品：</strong>' + (pub.product || '-') + ' · <strong>编号：</strong>' + (pub.productCode || '-') + '</p>' +
+      '<p style="color:var(--text-3);font-size:12px">佣金：' + (pub.commission || '-') + ' + 晒单奖：' + (pub.bonus || '-') + ' · ' + remainText + '</p>' +
+    '</div>' +
+    '<div class="form-row"><label>选择接单人</label><select class="form-input" id="quickAssignPerson">' + options + '</select></div>',
+    '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-accent" onclick="confirmQuickAssign(' + pubIdx + ')">确认接单</button>'
+  );
+}
+function confirmQuickAssign(pubIdx){
+  const sel = document.getElementById('quickAssignPerson');
+  if(!sel || !sel.value){ toast('请选择接单人', 'error'); return; }
+  const regIdx = parseInt(sel.value);
+  const regData = lsGet('regData', []);
+  const reg = regData[regIdx];
+  if(!reg){ toast('接单人不存在', 'error'); return; }
+  const pubData = lsGet('wfPubData', []);
+  const pub = pubData[pubIdx];
+  if(!pub){ toast('任务不存在', 'error'); return; }
+  const taskName = computeTaskName(pub);
+  // Check duplicate: same person + same task
+  const details = lsGet('wfDetailData', []);
+  const dup = details.find(d => d.period === taskName && d.nickname === reg.nickname);
+  if(dup){
+    toast('⚠️ ' + (reg.nickname||'') + ' 已接过该任务（期数 ' + taskName + '）', 'error');
+    return;
+  }
+  // Check interval
+  const intervals = lsGet('wfIntervalData', []);
+  const intervalRec = intervals.find(r => r.nickname === reg.nickname);
+  const canJoin = intervalRec ? computeCanJoin(intervalRec.lastDate) : true;
+  const days = intervalRec ? daysDiff(intervalRec.lastDate) : 12;
+  const doCreate = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const newRow = {
+      ...TABLE_DEFS.wfDetailTable.empty,
+      period: taskName,
+      date: today,
+      linkPerson: String(regIdx),
+      nickname: reg.nickname || '',
+      wechatName: reg.wechatName || '',
+      contact: reg.contact || '',
+      product: pub.product || '',
+      productCode: pub.productCode || '',
+      basePay: pub.commission || '',
+      bonusPay: pub.bonus || ''
+    };
+    const detailData = lsGet('wfDetailData', []);
+    detailData.push(newRow);
+    lsSet('wfDetailData', detailData);
+    // Sync interval
+    syncIntervalFromDetail(reg.nickname || '', today, taskName);
+    closeModal();
+    renderTable('wfPubTable');
+    updateStats();
+    debouncePush();
+    toast('✅ 已为 ' + (reg.nickname||'') + ' 创建接单明细（' + taskName + '）');
+  };
+  if(!canJoin && days < 12){
+    openModal('⚠️ 间隔不足提醒',
+      '<p style="color:var(--text-2);font-size:13px">接单人 <strong>' + reg.nickname + '</strong> 距上次接单仅 <strong>' + days + '</strong> 天，未满 12 天间隔要求。</p><p style="color:var(--text-3);font-size:12px">上次接单日期：' + (intervalRec.lastDate || '无记录') + '<br>需等待：' + (12 - days) + ' 天</p>',
+      '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-red" onclick="forceQuickAssign(' + pubIdx + ',' + regIdx + ')">确认强制接单</button>'
+    );
+  } else {
+    doCreate();
+  }
+}
+function forceQuickAssign(pubIdx, regIdx){
+  const regData = lsGet('regData', []);
+  const reg = regData[regIdx];
+  const pubData = lsGet('wfPubData', []);
+  const pub = pubData[pubIdx];
+  if(!reg || !pub) return;
+  const taskName = computeTaskName(pub);
+  const today = new Date().toISOString().split('T')[0];
+  const newRow = {
+    ...TABLE_DEFS.wfDetailTable.empty,
+    period: taskName,
+    date: today,
+    linkPerson: String(regIdx),
+    nickname: reg.nickname || '',
+    wechatName: reg.wechatName || '',
+    contact: reg.contact || '',
+    product: pub.product || '',
+    productCode: pub.productCode || '',
+    basePay: pub.commission || '',
+    bonusPay: pub.bonus || ''
+  };
+  const detailData = lsGet('wfDetailData', []);
+  detailData.push(newRow);
+  lsSet('wfDetailData', detailData);
+  syncIntervalFromDetail(reg.nickname || '', today, taskName);
+  closeModal();
+  renderTable('wfPubTable');
+  updateStats();
+  debouncePush();
+  toast('⚠️ 已强制接单（间隔不足）：' + (reg.nickname||''));
+}
   if(tableId === 'wfDetailTable' || tableId === 'regTable'){
     rebuildIntervalTable();
   }
