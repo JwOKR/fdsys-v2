@@ -1193,23 +1193,37 @@ function renderTable(tableId){
         sel.dataset.key = col.key;
         sel.addEventListener('change', function(){
           const regIdx = parseInt(this.value);
-          saveCell(tableId, ri, 'linkPerson', this.value);
-          if(!isNaN(regIdx) && regData[regIdx]){
-            // Auto-fill from regData
-            const reg = regData[regIdx];
+          if(isNaN(regIdx) || !regData[regIdx]) return;
+          const reg = regData[regIdx];
+          // Check interval requirement
+          const intervals = lsGet('wfIntervalData', []);
+          const intervalRec = intervals.find(r => r.nickname === reg.nickname);
+          const canJoin = intervalRec ? computeCanJoin(intervalRec.lastDate) : true;
+          const days = intervalRec ? daysDiff(intervalRec.lastDate) : 12;
+          const prevValue = row.linkPerson;
+          const doFill = () => {
+            saveCell(tableId, ri, 'linkPerson', this.value);
             saveCell(tableId, ri, 'nickname', reg.nickname || '');
             saveCell(tableId, ri, 'wechatName', reg.wechatName || '');
             saveCell(tableId, ri, 'contact', reg.contact || '');
-            // Update visible cells
             tr.querySelectorAll('td[data-key]').forEach(cell => {
               if(cell.dataset.key === 'nickname') cell.textContent = reg.nickname || '';
               if(cell.dataset.key === 'wechatName') cell.textContent = reg.wechatName || '';
               if(cell.dataset.key === 'contact') cell.textContent = reg.contact || '';
             });
-            // Auto-sync to interval table
             const curRow = data[ri];
             syncIntervalFromDetail(reg.nickname || '', curRow.date || '', curRow.period || '');
             toast('✅ 已自动填充：' + (reg.nickname||''));
+          };
+          if(!canJoin && days < 12){
+            openModal('⚠️ 间隔不足提醒',
+              '<p style="color:var(--text-2);font-size:13px">接单人 <strong>' + reg.nickname + '</strong> 距上次接单仅 <strong>' + days + '</strong> 天，未满 12 天间隔要求。</p><p style="color:var(--text-3);font-size:12px">上次接单日期：' + (intervalRec.lastDate || '无记录') + '<br>需等待：' + (12 - days) + ' 天</p>',
+              '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-red" onclick="confirmLinkPerson('+ri+','+regIdx+')">确认选择</button>'
+            );
+            // Store pending action
+            window._pendingLinkPerson = { tableId, ri, regIdx, tr, prevValue };
+          } else {
+            doFill();
           }
         });
         td.appendChild(sel);
@@ -1337,6 +1351,29 @@ function confirmDelete(tableId, rowIdx){
   if(tableId === 'wfDetailTable' || tableId === 'regTable'){
     rebuildIntervalTable();
   }
+}
+
+function confirmLinkPerson(ri, regIdx){
+  const p = window._pendingLinkPerson;
+  if(!p) return;
+  closeModal();
+  const regData = lsGet('regData', []);
+  const reg = regData[regIdx];
+  if(!reg) return;
+  saveCell(p.tableId, ri, 'linkPerson', String(regIdx));
+  saveCell(p.tableId, ri, 'nickname', reg.nickname || '');
+  saveCell(p.tableId, ri, 'wechatName', reg.wechatName || '');
+  saveCell(p.tableId, ri, 'contact', reg.contact || '');
+  p.tr.querySelectorAll('td[data-key]').forEach(cell => {
+    if(cell.dataset.key === 'nickname') cell.textContent = reg.nickname || '';
+    if(cell.dataset.key === 'wechatName') cell.textContent = reg.wechatName || '';
+    if(cell.dataset.key === 'contact') cell.textContent = reg.contact || '';
+  });
+  const data = lsGet('wfDetailData', []);
+  const curRow = data[ri];
+  syncIntervalFromDetail(reg.nickname || '', curRow.date || '', curRow.period || '');
+  toast('⚠️ 已强制选择（间隔不足）');
+  window._pendingLinkPerson = null;
 }
 
 // ─────────────────────────────────────────────
