@@ -1655,10 +1655,6 @@ function forceQuickAssign(pubIdx, regIdx){
   debouncePush();
   toast('⚠️ 已强制接单（间隔不足）：' + (reg.nickname||''));
 }
-  if(tableId === 'wfDetailTable' || tableId === 'regTable'){
-    rebuildIntervalTable();
-  }
-}
 
 function confirmLinkPerson(ri, regIdx){
   const p = window._pendingLinkPerson;
