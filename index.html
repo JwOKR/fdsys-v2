@@ -322,12 +322,11 @@
   <!-- ═══ Tabs ═══ -->
   <div class="tabs" id="tabs">
     <button class="tab on" onclick="go(0)">放单话术</button>
-    <button class="tab" onclick="go(1)">登记模板</button>
+    <button class="tab" onclick="go(1)">登记与福利<b style="background:var(--accent-glow);color:var(--accent)">联动</b></button>
     <button class="tab" onclick="go(2)">检查流程</button>
     <button class="tab" onclick="go(3)">催收货流程</button>
     <button class="tab" onclick="go(4)">异常处理</button>
     <button class="tab" onclick="go(5)">关键词管理</button>
-    <button class="tab" onclick="go(6)">福利任务<b style="background:var(--accent-glow);color:var(--accent)">NEW</b></button>
   </div>
 
   <!-- ╔══════════════════════════════════════════╗ -->
@@ -410,10 +409,11 @@
   </div>
 
   <!-- ╔══════════════════════════════════════════╗ -->
-  <!-- ║          PANEL 1 · 登记模板              ║ -->
+  <!-- ║          PANEL 1 · 登记与福利（联动）    ║ -->
   <!-- ╚══════════════════════════════════════════╝ -->
   <div class="pn" id="p1">
 
+    <!-- 接单人登记表 -->
     <div class="cd">
       <div class="cd-h">
         <div class="cd-hl"><div class="cd-dot" style="background:var(--accent)"></div><h3>接单人登记表</h3><span class="sub">· 点击单元格可编辑 · 悬停行显示操作按钮</span></div>
@@ -430,6 +430,7 @@
       <div class="nt"><span class="nt-ico">💡</span><span>状态列可点击切换：签收（未发货/运输中/已签收）· 确认收货（未确认/已确认）· 好评（未评价/已好评/已晒图）· 佣金（未结/已结/已拒付）· 点击单元格可直接编辑</span></div>
     </div>
 
+    <!-- 接单人筛选标准 -->
     <div class="cd">
       <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--green)"></div><h3>接单人筛选标准</h3></div></div>
       <div class="cd-b">
@@ -458,6 +459,7 @@
       </div>
     </div>
 
+    <!-- 放单前设置 Checklist -->
     <div class="cd">
       <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--blue)"></div><h3>放单前设置 Checklist</h3></div></div>
       <div class="cd-b">
@@ -474,6 +476,204 @@
         </div>
       </div>
     </div>
+
+    <!-- 福利任务模块 -->
+    <div class="cd" style="overflow:visible">
+      <div class="wf-banner">
+        <div class="wf-banner-ico">🎁</div>
+        <div>
+          <h4>福利任务模块</h4>
+          <p>适用于群内福利放单场景：加购收藏→关注店铺→购物车下单→好评晒单，12天接单间隔管理，禁止信用卡/花呗分期</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 福利任务 · 群内发布话术 -->
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--accent)"></div><h3>福利任务 · 群内发布话术</h3><span class="sub">· 完整模板直接复制发送</span></div><span class="b b-pk"><span class="b-i"></span>群内公告</span></div>
+      <div class="cd-b">
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-3">重要</span><span class="sb-tle">禁止事项（置顶醒目）</span></div>
+          <div class="sb-c" data-script="wf-forbid">
+            <span class="warn">🚫 禁止使用信用卡、花呗分期付款！</span><br>
+            必须使用【余额 / 储蓄卡 / 余额宝】支付
+            <button class="copy-btn" onclick="copyScript(this)">复制</button>
+          </div>
+        </div>
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-1">模板</span><span class="sb-tle">标准群内公告</span></div>
+          <div class="sb-c" data-script="wf-announce" style="font-family:var(--mono);font-size:12px;white-space:pre-wrap;line-height:1.9">简单任务，5元现金
+
+【福利任务操作步骤】<span class="warn">禁止使用信用卡，分期付款支付哈！</span>
+
+<span class="ok">第一步</span>：打开淘口令或者链接，加购，收藏该商品
+
+<span class="ok">第二步</span>：关注店铺，按照销量排序，收藏加购任意2件商品
+
+<span class="ok">第三步</span>：返回购物车拍下口令的那件商品
+
+<span class="ok">第四步</span>：收货后好评，参与晒单可另返3元（找群主要图）
+
+━━━━━━━━━━━━━━━━━━━━━
+📌 PS：每天群主发出任务数，限人数参与任务，先到先得，间隔12天可再次接任务
+
+✅ 接单请回复：已接单 + 淘宝昵称<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 接单人操作指南 -->
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--green)"></div><h3>接单人操作指南</h3><span class="sub">· 四步图文指引（发给接单人）</span></div><span class="b b-g"><span class="b-i"></span>操作指引</span></div>
+      <div class="cd-b" style="padding:18px 22px">
+        <div class="wf-step">
+          <div class="wf-num" style="background:linear-gradient(135deg,var(--green),#1da87a)">1</div>
+          <div class="wf-body">
+            <h4>打开淘口令 → 加购 + 收藏</h4>
+            <p><span class="wf-tag wf-do">加购</span><span class="wf-tag wf-do">收藏</span> 复制淘口令，打开淘宝APP自动弹出 → 进入商品页面 → 点「加入购物车」→ 点「❤收藏」</p>
+            <p><span class="wf-tag wf-tip">注意</span> 不要立刻下单！先完成后续步骤</p>
+          </div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-num" style="background:linear-gradient(135deg,var(--blue),#3b7ddd)">2</div>
+          <div class="wf-body">
+            <h4>关注店铺 + 浏览加购其他商品</h4>
+            <p><span class="wf-tag wf-do">关注</span><span class="wf-tag wf-do">加购×2</span> 点击店铺名进入主页 → 点「+关注」→ 全部商品 → 按【销量】排序 → 浏览3-5件 → 挑2件「加购+收藏」</p>
+            <p><span class="wf-tag wf-tip">建议</span> 每件商品浏览停留 1-2 分钟</p>
+          </div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-num" style="background:linear-gradient(135deg,var(--accent),#d44d1a)">3</div>
+          <div class="wf-body">
+            <h4>返回购物车 → 拍下付款</h4>
+            <p><span class="wf-tag wf-do">购物车下单</span> 打开购物车 → 只勾选第①步加购的主商品 → 提交订单 → 付款</p>
+            <p><span class="wf-tag wf-dont">禁止</span> 不要选信用卡 / 花呗分期</p>
+            <p><span class="wf-tag wf-do">正确支付</span> 余额 / 余额宝 / 储蓄卡</p>
+          </div>
+        </div>
+        <div class="wf-step">
+          <div class="wf-num" style="background:linear-gradient(135deg,var(--purple),#7c5cda)">4</div>
+          <div class="wf-body">
+            <h4>收货 + 好评 + 晒单</h4>
+            <p><span class="wf-tag wf-do">好评</span> 收到快递 → 确认收货 → 五星好评 + 15字以上</p>
+            <p><span class="wf-tag wf-tip">+3元</span> 找群主要晒图模板 → 带图评价 → 截图发群主领额外3元</p>
+          </div>
+        </div>
+      </div>
+      <div class="nt"><span class="nt-ico">📸</span><span>完成后需提交截图：① 订单详情页 ② 好评截图（如已评价）</span></div>
+    </div>
+
+    <!-- 福利任务发布管理表 -->
+    <div class="cd">
+      <div class="cd-h">
+        <div class="cd-hl"><div class="cd-dot" style="background:var(--yellow)"></div><h3>福利任务发布管理表</h3><span class="sub">· 每期任务总览</span></div>
+        <div class="cd-hr">
+          <button class="btn btn-accent btn-sm" onclick="addRow('wfPubTable')">+ 新增任务</button>
+        </div>
+      </div>
+      <div class="cd-b">
+        <table id="wfPubTable">
+          <thead><tr><th style="width:40px">#</th><th>期数</th><th>发布日期</th><th>商品名称</th><th>淘口令</th><th>商品价格</th><th>基础佣金</th><th>晒单奖励</th><th>限接人数</th><th>已接人数</th><th>剩余名额</th><th>状态</th><th style="width:50px">操作</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 接单明细表（联动版） -->
+    <div class="cd">
+      <div class="cd-h">
+        <div class="cd-hl"><div class="cd-dot" style="background:var(--blue)"></div><h3>福利任务 · 接单明细表</h3><span class="sub">· 选择接单人自动填充信息</span></div>
+        <div class="cd-hr">
+          <button class="btn btn-accent btn-sm" onclick="addRow('wfDetailTable')">+ 新增接单</button>
+        </div>
+      </div>
+      <div class="cd-b">
+        <table id="wfDetailTable">
+          <thead><tr><th style="width:40px">#</th><th>期数</th><th>接单日期</th><th><span style="color:var(--accent)">选择接单人</span></th><th>淘宝昵称</th><th>联系方式</th><th>下单时间</th><th>订单编号</th><th>实付</th><th>快递单号</th><th>签收</th><th>确认收货</th><th>好评</th><th>晒单</th><th>基础返款</th><th>晒单奖</th><th>总返款</th><th>返款日期</th><th>付款方式</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="nt"><span class="nt-ico">🔗</span><span>联动功能：从「选择接单人」下拉框选择已登记的接单人，自动填充淘宝昵称和联系方式 · 晒单奖励默认3元 · 总返款 = 基础佣金 + 晒单奖励</span></div>
+    </div>
+
+    <!-- 接单间隔管理 -->
+    <div class="cd">
+      <div class="cd-h">
+        <div class="cd-hl"><div class="cd-dot" style="background:var(--purple)"></div><h3>接单间隔管理表</h3><span class="sub">· 核心规则：两次接单间隔 ≥ 12天</span></div>
+        <span class="b b-p"><span class="b-i"></span>间隔管控</span>
+      </div>
+      <div class="cd-b">
+        <table id="wfIntervalTable">
+          <thead><tr><th style="width:40px">#</th><th>淘宝昵称</th><th>上次接单日期</th><th>上次期数</th><th>距今天数</th><th>间隔要求</th><th>下次可接日期</th><th>是否可接</th><th style="width:50px">操作</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="nt"><span class="nt-ico">📅</span><span>间隔公式：距今天数 = 今天 - 上次接单日期 · ≥ 12 → 可接 · < 12 → 需等待 (12 - 距今天数) 天</span></div>
+    </div>
+
+    <!-- 福利任务检查流程 -->
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--cyan)"></div><h3>福利任务 · 检查流程</h3><span class="sub">· 针对福利任务定制的检查项</span></div></div>
+      <div class="cd-b">
+        <table>
+          <thead><tr><th>阶段</th><th>检查项</th><th>标准</th><th>检查方式</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td rowspan="4"><strong style="color:var(--green)">下单前</strong></td><td>付款方式</td><td>余额/储蓄卡/余额宝，<span style="color:var(--red)">非信用卡分期</span></td><td>要求接单人确认</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-1"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
+            <tr><td>接单间隔</td><td>距上次接单 ≥ 12天</td><td>查间隔管理表</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-2"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
+            <tr><td>名额检查</td><td>当期剩余名额 > 0</td><td>查发布管理表</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-3"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
+            <tr><td>淘口令有效</td><td>复制后正常弹出商品页</td><td>自己先测试</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-4"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
+            <tr><td rowspan="2"><strong style="color:var(--yellow)">下单后</strong></td><td>订单详情页截图</td><td>订单编号、金额、时间、地址</td><td>人工核验</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-post-1"><option value="pending">待提交</option><option value="pass">✅ 已交</option><option value="fail">❌ 不合格</option></select></td></tr>
+            <tr><td>购物车截图（选交）</td><td>确认从购物车下单，3件商品</td><td>人工核验</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-post-2"><option value="pending">选交</option><option value="pass">✅ 已交</option><option value="skip">⏭ 未交</option></select></td></tr>
+            <tr><td rowspan="4"><strong style="color:var(--accent)">签收后</strong></td><td>物流签收</td><td>显示已签收</td><td>快递100查询</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-recv-1"><option value="pending">待检查</option><option value="pass">✅ 已签</option><option value="fail">❌ 未签</option></select></td></tr>
+            <tr><td>确认收货</td><td>买家已点确认收货</td><td>后台查看</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-recv-2"><option value="pending">待确认</option><option value="pass">✅ 已确认</option><option value="fail">❌ 未确认</option></select></td></tr>
+            <tr><td>好评</td><td>五星 + 15字以上</td><td>前台查看</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-recv-3"><option value="pending">待好评</option><option value="pass">✅ 已好评</option><option value="fail">❌ 未评</option></select></td></tr>
+            <tr><td>晒单（可选）</td><td>带图评价 ≥ 3张</td><td>接单人截图</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-recv-4"><option value="pending">选做</option><option value="pass">✅ 已晒</option><option value="skip">⏭ 未晒</option></select></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 催收货话术 -->
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--pink)"></div><h3>福利任务 · 催确认收货话术</h3><span class="sub">· 签收后 1天 → 3天 → 5天 → 7天</span></div></div>
+      <div class="cd-b">
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-1">签收 +1天</span><span class="sb-tle">温馨提醒</span></div>
+          <div class="sb-c" data-script="wf-urge-1">亲，物流显示已签收啦~ 商品还满意吗？满意的话帮忙确认收货+好评哦，好给您返款~ <span class="hl">晒单还能额外拿3元哦！</span><button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-2">签收 +3天</span><span class="sb-tle">二次跟进</span></div>
+          <div class="sb-c" data-script="wf-urge-2">亲，打扰啦~ 那单福利商品收到了吧？麻烦帮忙确认收货+好评哈，确认后24h内返款给您🙏 <span class="hl">晒图评价截图发我，再+3元~</span><button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-3">签收 +5天</span><span class="sb-tle">重点催促</span></div>
+          <div class="sb-c" data-script="wf-urge-3">亲，这单已签收5天了哦~ 再不确认的话系统会自动确认的，自动确认的话返款会比较慢，建议现在操作一下~ 有问题随时找我！<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+        <div class="sb">
+          <div class="sb-top"><span class="stag stag-4">签收 +7天</span><span class="sb-tle">最后提醒</span></div>
+          <div class="sb-c" data-script="wf-urge-4">亲，最后提醒一次哦。如果商品有问题可以联系我退换，如果没问题麻烦确认收货好评~ <span class="warn">超时未操作的话，按照约定返款将无法结算</span>。麻烦在XX日前回复，谢谢！<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 禁止事项 -->
+    <div class="cd">
+      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--red)"></div><h3>福利任务 · 禁止事项清单</h3><span class="sub">· 违反任意一条：当期返款取消 + 永久取消资格</span></div><span class="b b-r"><span class="b-i"></span>红线规则</span></div>
+      <div class="cd-b">
+        <div class="forbid-grid">
+          <div class="forbid-item">🚫 禁止使用信用卡付款</div>
+          <div class="forbid-item">🚫 禁止使用花呗分期付款</div>
+          <div class="forbid-item">🚫 禁止12天内重复接单</div>
+          <div class="forbid-item">🚫 禁止直接点链接下单（必须购物车）</div>
+          <div class="forbid-item">🚫 禁止不加购/不收藏/不关注直接下单</div>
+          <div class="forbid-item">🚫 禁止收到货后不确认收货</div>
+          <div class="forbid-item">🚫 禁止给中差评</div>
+          <div class="forbid-item">🚫 禁止将任务信息转发/截图给他人</div>
+          <div class="forbid-item">🚫 禁止使用虚拟/批量收货地址</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- ╔══════════════════════════════════════════╗ -->
@@ -639,206 +839,6 @@
     </div>
   </div>
 
-  <!-- ╔══════════════════════════════════════════════════╗ -->
-  <!-- ║          PANEL 6 · 福利任务                      ║ -->
-  <!-- ╚══════════════════════════════════════════════════╝ -->
-  <div class="pn" id="p6">
-
-    <div class="cd" style="overflow:visible">
-      <div class="wf-banner">
-        <div class="wf-banner-ico">🎁</div>
-        <div>
-          <h4>福利任务模块</h4>
-          <p>适用于群内福利放单场景：加购收藏→关注店铺→购物车下单→好评晒单，12天接单间隔管理，禁止信用卡/花呗分期</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="cd">
-      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--accent)"></div><h3>福利任务 · 群内发布话术</h3><span class="sub">· 完整模板直接复制发送</span></div><span class="b b-pk"><span class="b-i"></span>群内公告</span></div>
-      <div class="cd-b">
-        <div class="sb">
-          <div class="sb-top"><span class="stag stag-3">重要</span><span class="sb-tle">禁止事项（置顶醒目）</span></div>
-          <div class="sb-c" data-script="wf-forbid">
-            <span class="warn">🚫 禁止使用信用卡、花呗分期付款！</span><br>
-            必须使用【余额 / 储蓄卡 / 余额宝】支付
-            <button class="copy-btn" onclick="copyScript(this)">复制</button>
-          </div>
-        </div>
-        <div class="sb">
-          <div class="sb-top"><span class="stag stag-1">模板</span><span class="sb-tle">标准群内公告</span></div>
-          <div class="sb-c" data-script="wf-announce" style="font-family:var(--mono);font-size:12px;white-space:pre-wrap;line-height:1.9">简单任务，5元现金
-
-【福利任务操作步骤】<span class="warn">禁止使用信用卡，分期付款支付哈！</span>
-
-<span class="ok">第一步</span>：打开淘口令或者链接，加购，收藏该商品
-
-<span class="ok">第二步</span>：关注店铺，按照销量排序，收藏加购任意2件商品
-
-<span class="ok">第三步</span>：返回购物车拍下口令的那件商品
-
-<span class="ok">第四步</span>：收货后好评，参与晒单可另返3元（找群主要图）
-
-━━━━━━━━━━━━━━━━━━━━━
-📌 PS：每天群主发出任务数，限人数参与任务，先到先得，间隔12天可再次接任务
-
-✅ 接单请回复：已接单 + 淘宝昵称<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="cd">
-      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--green)"></div><h3>接单人操作指南</h3><span class="sub">· 四步图文指引（发给接单人）</span></div><span class="b b-g"><span class="b-i"></span>操作指引</span></div>
-      <div class="cd-b" style="padding:18px 22px">
-        <div class="wf-step">
-          <div class="wf-num" style="background:linear-gradient(135deg,var(--green),#1da87a)">1</div>
-          <div class="wf-body">
-            <h4>打开淘口令 → 加购 + 收藏</h4>
-            <p><span class="wf-tag wf-do">加购</span><span class="wf-tag wf-do">收藏</span> 复制淘口令，打开淘宝APP自动弹出 → 进入商品页面 → 点「加入购物车」→ 点「❤收藏」</p>
-            <p><span class="wf-tag wf-tip">注意</span> 不要立刻下单！先完成后续步骤</p>
-          </div>
-        </div>
-        <div class="wf-step">
-          <div class="wf-num" style="background:linear-gradient(135deg,var(--blue),#3b7ddd)">2</div>
-          <div class="wf-body">
-            <h4>关注店铺 + 浏览加购其他商品</h4>
-            <p><span class="wf-tag wf-do">关注</span><span class="wf-tag wf-do">加购×2</span> 点击店铺名进入主页 → 点「+关注」→ 全部商品 → 按【销量】排序 → 浏览3-5件 → 挑2件「加购+收藏」</p>
-            <p><span class="wf-tag wf-tip">建议</span> 每件商品浏览停留 1-2 分钟</p>
-          </div>
-        </div>
-        <div class="wf-step">
-          <div class="wf-num" style="background:linear-gradient(135deg,var(--accent),#d44d1a)">3</div>
-          <div class="wf-body">
-            <h4>返回购物车 → 拍下付款</h4>
-            <p><span class="wf-tag wf-do">购物车下单</span> 打开购物车 → 只勾选第①步加购的主商品 → 提交订单 → 付款</p>
-            <p><span class="wf-tag wf-dont">禁止</span> 不要选信用卡 / 花呗分期</p>
-            <p><span class="wf-tag wf-do">正确支付</span> 余额 / 余额宝 / 储蓄卡</p>
-          </div>
-        </div>
-        <div class="wf-step">
-          <div class="wf-num" style="background:linear-gradient(135deg,var(--purple),#7c5cda)">4</div>
-          <div class="wf-body">
-            <h4>收货 + 好评 + 晒单</h4>
-            <p><span class="wf-tag wf-do">好评</span> 收到快递 → 确认收货 → 五星好评 + 15字以上</p>
-            <p><span class="wf-tag wf-tip">+3元</span> 找群主要晒图模板 → 带图评价 → 截图发群主领额外3元</p>
-          </div>
-        </div>
-      </div>
-      <div class="nt"><span class="nt-ico">📸</span><span>完成后需提交截图：① 订单详情页 ② 好评截图（如已评价）</span></div>
-    </div>
-
-    <!-- 福利任务发布管理表 -->
-    <div class="cd">
-      <div class="cd-h">
-        <div class="cd-hl"><div class="cd-dot" style="background:var(--yellow)"></div><h3>福利任务发布管理表</h3><span class="sub">· 每期任务总览</span></div>
-        <div class="cd-hr">
-          <button class="btn btn-accent btn-sm" onclick="addRow('wfPubTable')">+ 新增任务</button>
-        </div>
-      </div>
-      <div class="cd-b">
-        <table id="wfPubTable">
-          <thead><tr><th style="width:40px">#</th><th>期数</th><th>发布日期</th><th>商品名称</th><th>淘口令</th><th>商品价格</th><th>基础佣金</th><th>晒单奖励</th><th>限接人数</th><th>已接人数</th><th>剩余名额</th><th>状态</th><th style="width:50px">操作</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- 接单明细表 -->
-    <div class="cd">
-      <div class="cd-h">
-        <div class="cd-hl"><div class="cd-dot" style="background:var(--blue)"></div><h3>福利任务 · 接单明细表</h3><span class="sub">· 每位接单人的完整状态追踪</span></div>
-        <div class="cd-hr">
-          <button class="btn btn-accent btn-sm" onclick="addRow('wfDetailTable')">+ 新增接单</button>
-        </div>
-      </div>
-      <div class="cd-b">
-        <table id="wfDetailTable">
-          <thead><tr><th style="width:40px">#</th><th>期数</th><th>接单日期</th><th>淘宝昵称</th><th>联系方式</th><th>下单时间</th><th>订单编号</th><th>实付</th><th>快递单号</th><th>签收</th><th>确认收货</th><th>好评</th><th>晒单</th><th>基础返款</th><th>晒单奖</th><th>总返款</th><th>返款日期</th><th>付款方式</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="nt"><span class="nt-ico">💡</span><span>晒单奖励默认3元 · 总返款 = 基础佣金 + 晒单奖励（已晒单时） · 付款方式必须为余额/储蓄卡/余额宝</span></div>
-    </div>
-
-    <!-- 接单间隔管理 -->
-    <div class="cd">
-      <div class="cd-h">
-        <div class="cd-hl"><div class="cd-dot" style="background:var(--purple)"></div><h3>接单间隔管理表</h3><span class="sub">· 核心规则：两次接单间隔 ≥ 12天</span></div>
-        <span class="b b-p"><span class="b-i"></span>间隔管控</span>
-      </div>
-      <div class="cd-b">
-        <table id="wfIntervalTable">
-          <thead><tr><th style="width:40px">#</th><th>淘宝昵称</th><th>上次接单日期</th><th>上次期数</th><th>距今天数</th><th>间隔要求</th><th>下次可接日期</th><th>是否可接</th><th style="width:50px">操作</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="nt"><span class="nt-ico">📅</span><span>间隔公式：距今天数 = 今天 - 上次接单日期 · ≥ 12 → 可接 · < 12 → 需等待 (12 - 距今天数) 天</span></div>
-    </div>
-
-    <!-- 福利任务检查流程 -->
-    <div class="cd">
-      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--cyan)"></div><h3>福利任务 · 检查流程</h3><span class="sub">· 针对福利任务定制的检查项</span></div></div>
-      <div class="cd-b">
-        <table>
-          <thead><tr><th>阶段</th><th>检查项</th><th>标准</th><th>检查方式</th><th>状态</th></tr></thead>
-          <tbody>
-            <tr><td rowspan="4"><strong style="color:var(--green)">下单前</strong></td><td>付款方式</td><td>余额/储蓄卡/余额宝，<span style="color:var(--red)">非信用卡分期</span></td><td>要求接单人确认</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-1"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
-            <tr><td>接单间隔</td><td>距上次接单 ≥ 12天</td><td>查间隔管理表</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-2"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
-            <tr><td>名额检查</td><td>当期剩余名额 > 0</td><td>查发布管理表</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-3"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
-            <tr><td>淘口令有效</td><td>复制后正常弹出商品页</td><td>自己先测试</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-4"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
-            <tr><td rowspan="2"><strong style="color:var(--yellow)">下单后</strong></td><td>订单详情页截图</td><td>订单编号、金额、时间、地址</td><td>人工核验</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-post-1"><option value="pending">待提交</option><option value="pass">✅ 已交</option><option value="fail">❌ 不合格</option></select></td></tr>
-            <tr><td>购物车截图（选交）</td><td>确认从购物车下单，3件商品</td><td>人工核验</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-post-2"><option value="pending">选交</option><option value="pass">✅ 已交</option><option value="skip">⏭ 未交</option></select></td></tr>
-            <tr><td rowspan="4"><strong style="color:var(--accent)">签收后</strong></td><td>物流签收</td><td>显示已签收</td><td>快递100查询</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-recv-1"><option value="pending">待检查</option><option value="pass">✅ 已签</option><option value="fail">❌ 未签</option></select></td></tr>
-            <tr><td>确认收货</td><td>买家已点确认收货</td><td>后台查看</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-recv-2"><option value="pending">待确认</option><option value="pass">✅ 已确认</option><option value="fail">❌ 未确认</option></select></td></tr>
-            <tr><td>好评</td><td>五星 + 15字以上</td><td>前台查看</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-recv-3"><option value="pending">待好评</option><option value="pass">✅ 已好评</option><option value="fail">❌ 未评</option></select></td></tr>
-            <tr><td>晒单（可选）</td><td>带图评价 ≥ 3张</td><td>接单人截图</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-recv-4"><option value="pending">选做</option><option value="pass">✅ 已晒</option><option value="skip">⏭ 未晒</option></select></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- 催收货话术 -->
-    <div class="cd">
-      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--pink)"></div><h3>福利任务 · 催确认收货话术</h3><span class="sub">· 签收后 1天 → 3天 → 5天 → 7天</span></div></div>
-      <div class="cd-b">
-        <div class="sb">
-          <div class="sb-top"><span class="stag stag-1">签收 +1天</span><span class="sb-tle">温馨提醒</span></div>
-          <div class="sb-c" data-script="wf-urge-1">亲，物流显示已签收啦~ 商品还满意吗？满意的话帮忙确认收货+好评哦，好给您返款~ <span class="hl">晒单还能额外拿3元哦！</span><button class="copy-btn" onclick="copyScript(this)">复制</button></div>
-        </div>
-        <div class="sb">
-          <div class="sb-top"><span class="stag stag-2">签收 +3天</span><span class="sb-tle">二次跟进</span></div>
-          <div class="sb-c" data-script="wf-urge-2">亲，打扰啦~ 那单福利商品收到了吧？麻烦帮忙确认收货+好评哈，确认后24h内返款给您🙏 <span class="hl">晒图评价截图发我，再+3元~</span><button class="copy-btn" onclick="copyScript(this)">复制</button></div>
-        </div>
-        <div class="sb">
-          <div class="sb-top"><span class="stag stag-3">签收 +5天</span><span class="sb-tle">重点催促</span></div>
-          <div class="sb-c" data-script="wf-urge-3">亲，这单已签收5天了哦~ 再不确认的话系统会自动确认的，自动确认的话返款会比较慢，建议现在操作一下~ 有问题随时找我！<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
-        </div>
-        <div class="sb">
-          <div class="sb-top"><span class="stag stag-4">签收 +7天</span><span class="sb-tle">最后提醒</span></div>
-          <div class="sb-c" data-script="wf-urge-4">亲，最后提醒一次哦。如果商品有问题可以联系我退换，如果没问题麻烦确认收货好评~ <span class="warn">超时未操作的话，按照约定返款将无法结算</span>。麻烦在XX日前回复，谢谢！<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 禁止事项 -->
-    <div class="cd">
-      <div class="cd-h"><div class="cd-hl"><div class="cd-dot" style="background:var(--red)"></div><h3>福利任务 · 禁止事项清单</h3><span class="sub">· 违反任意一条：当期返款取消 + 永久取消资格</span></div><span class="b b-r"><span class="b-i"></span>红线规则</span></div>
-      <div class="cd-b">
-        <div class="forbid-grid">
-          <div class="forbid-item">🚫 禁止使用信用卡付款</div>
-          <div class="forbid-item">🚫 禁止使用花呗分期付款</div>
-          <div class="forbid-item">🚫 禁止12天内重复接单</div>
-          <div class="forbid-item">🚫 禁止直接点链接下单（必须购物车）</div>
-          <div class="forbid-item">🚫 禁止不加购/不收藏/不关注直接下单</div>
-          <div class="forbid-item">🚫 禁止收到货后不确认收货</div>
-          <div class="forbid-item">🚫 禁止给中差评</div>
-          <div class="forbid-item">🚫 禁止将任务信息转发/截图给他人</div>
-          <div class="forbid-item">🚫 禁止使用虚拟/批量收货地址</div>
-        </div>
-      </div>
-    </div>
-
-  </div>
 
 </div>
 
@@ -1057,6 +1057,7 @@ const TABLE_DEFS = {
       { key:'idx', label:'#', type:'auto', width:40 },
       { key:'period', label:'期数', type:'text' },
       { key:'date', label:'接单日期', type:'date' },
+      { key:'linkPerson', label:'选择接单人', type:'linkPerson' },
       { key:'nickname', label:'淘宝昵称', type:'text' },
       { key:'contact', label:'联系方式', type:'text' },
       { key:'orderTime', label:'下单时间', type:'text' },
@@ -1074,7 +1075,7 @@ const TABLE_DEFS = {
       { key:'payMethod', label:'付款方式', type:'status', options:['余额','储蓄卡','余额宝','信用卡(违规)','花呗(违规)'] },
       { key:'note', label:'备注', type:'text' }
     ],
-    empty: { period:'',date:'',nickname:'',contact:'',orderTime:'',orderId:'',paid:'',tracking:'',delivery:'未发货',confirm:'未确认',review:'未评价',photoReview:'未晒单',basePay:'',bonusPay:'',totalPay:'',payDate:'',payMethod:'余额',note:'' }
+    empty: { period:'',date:'',linkPerson:'',nickname:'',contact:'',orderTime:'',orderId:'',paid:'',tracking:'',delivery:'未发货',confirm:'未确认',review:'未评价',photoReview:'未晒单',basePay:'',bonusPay:'',totalPay:'',payDate:'',payMethod:'余额',note:'' }
   },
   wfIntervalTable: {
     storageKey: 'wfIntervalData',
@@ -1157,6 +1158,43 @@ function renderTable(tableId){
         sel.dataset.row = ri;
         sel.dataset.key = col.key;
         sel.addEventListener('change', function(){ saveCell(tableId, ri, col.key, this.value); });
+        td.appendChild(sel);
+      } else if(col.type === 'linkPerson'){
+        const sel = document.createElement('select');
+        sel.className = 'inline-select';
+        sel.style.minWidth = '120px';
+        // Default empty option
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = ''; defaultOpt.textContent = '-- 选择接单人 --';
+        sel.appendChild(defaultOpt);
+        // Populate from registration data
+        const regData = lsGet('regData', []);
+        regData.forEach((reg, regIdx) => {
+          const o = document.createElement('option');
+          o.value = regIdx;
+          o.textContent = reg.nickname || ('接单人#' + (regIdx+1));
+          if(row.linkPerson !== undefined && row.linkPerson !== '' && parseInt(row.linkPerson) === regIdx) o.selected = true;
+          sel.appendChild(o);
+        });
+        sel.dataset.row = ri;
+        sel.dataset.key = col.key;
+        sel.addEventListener('change', function(){
+          const regIdx = parseInt(this.value);
+          saveCell(tableId, ri, 'linkPerson', this.value);
+          if(!isNaN(regIdx) && regData[regIdx]){
+            // Auto-fill nickname and contact
+            const reg = regData[regIdx];
+            saveCell(tableId, ri, 'nickname', reg.nickname || '');
+            saveCell(tableId, ri, 'contact', reg.contact || '');
+            // Update visible cells
+            const row = tr;
+            row.querySelectorAll('td[data-key]').forEach(cell => {
+              if(cell.dataset.key === 'nickname') cell.textContent = reg.nickname || '';
+              if(cell.dataset.key === 'contact') cell.textContent = reg.contact || '';
+            });
+            toast('✅ 已自动填充：' + (reg.nickname||''));
+          }
+        });
         td.appendChild(sel);
       } else if(col.type === 'computed-interval'){
         td.textContent = computeInterval(row.lastDate);
