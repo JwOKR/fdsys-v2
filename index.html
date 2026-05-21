@@ -1923,9 +1923,9 @@ async function createGist(data){
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      description: '放单运营管理系统 - 数据备份 (自动同步)',
+      description: '放单运营管理系统 - 数据备份',
       public: 'false',
-      files: [{ file_name: 'fdsys-data.json', content: JSON.stringify(data, null, 2) }]
+      files: { 'fdsys-data.json': { content: JSON.stringify(data, null, 2) } }
     })
   });
   if(!resp.ok) throw new Error('创建Gist失败: ' + resp.status);
@@ -1938,7 +1938,7 @@ async function updateGist(gid, data){
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      files: [{ file_name: 'fdsys-data.json', content: JSON.stringify(data, null, 2) }]
+      files: { 'fdsys-data.json': { content: JSON.stringify(data, null, 2) } }
     })
   });
   if(!resp.ok) throw new Error('更新Gist失败: ' + resp.status);
@@ -1949,14 +1949,25 @@ async function readGist(gid){
   const resp = await fetch(GITEE_API + '/gists/' + gid + '?access_token=' + cloudPat);
   if(!resp.ok) throw new Error('读取Gist失败: ' + resp.status);
   const gist = await resp.json();
-  const files = gist.files || [];
-  const file = files.find(f => f.filename === 'fdsys-data.json' || f.file_name === 'fdsys-data.json');
-  if(!file) throw new Error('Gist中无数据文件');
-  if(file.content) return JSON.parse(file.content);
+  const files = gist.files;
+  if(!files) throw new Error('Gist中无数据文件');
+  // Gitee files 可能是对象 {filename: {content}} 或数组 [{filename, content}]
+  let fileData;
+  if(Array.isArray(files)){
+    const f = files.find(f => f.filename === 'fdsys-data.json' || f.file_name === 'fdsys-data.json');
+    if(f) fileData = f;
+  } else {
+    fileData = files['fdsys-data.json'];
+  }
+  if(!fileData) throw new Error('Gist中无数据文件');
+  if(fileData.content) return JSON.parse(fileData.content);
   // Fallback: fetch raw content
-  const rawResp = await fetch(file.raw_url);
-  if(!rawResp.ok) throw new Error('读取文件内容失败');
-  return JSON.parse(await rawResp.text());
+  if(fileData.raw_url){
+    const rawResp = await fetch(fileData.raw_url);
+    if(!rawResp.ok) throw new Error('读取文件内容失败');
+    return JSON.parse(await rawResp.text());
+  }
+  throw new Error('无法读取文件内容');
 }
 
 async function cloudPush(){
