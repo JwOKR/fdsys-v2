@@ -149,6 +149,12 @@
   td .inline-select:focus{border-color:var(--accent);outline:0}
   td .inline-select option{background:var(--surface-2);color:var(--text)}
 
+  /* ── Filter row ── */
+  .filter-row td{padding:4px 6px;background:var(--surface-2);border-bottom:1px solid var(--border)}
+  .filter-row input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:4px 6px;color:var(--text);font-size:11px;font-family:var(--sans);outline:0;transition:border-color .15s}
+  .filter-row input:focus{border-color:var(--accent)}
+  .filter-row input::placeholder{color:var(--text-4)}
+
   /* ── Badge ── */
   .b{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:6px;font-size:11px;font-weight:500;white-space:nowrap}
   .b-i{width:5px;height:5px;border-radius:50%;flex-shrink:0}
@@ -304,6 +310,7 @@
       <div class="hdr-sub">话术 · 登记 · 检查 · 催收 · 异常 · 关键词 · 福利任务 &mdash; 全模块整合 · 数据可编辑 · 云端永久存储</div>
     </div>
     <div class="hdr-right">
+      <button class="btn btn-sm btn-green" onclick="exportExcel()" title="合并导出所有表格为Excel文件">📊 导出Excel</button>
       <button class="btn btn-sm" onclick="exportData()" title="导出JSON文件到本地">📥 导出</button>
       <button class="btn btn-sm" onclick="document.getElementById('importFile').click()" title="从JSON文件恢复">📤 导入</button>
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
@@ -436,6 +443,7 @@
       <!-- 子面板 0: 接单人登记表 -->
       <div class="sub-pn on" id="sp0">
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
+          <button class="btn btn-sm" onclick="clearFilters('regTable')" title="清除所有筛选条件">🔍 清除筛选</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('regTable')">+ 新增接单人</button>
         </div>
         <div class="cd-b">
@@ -450,6 +458,7 @@
       <!-- 子面板 1: 福利任务发布管理表 -->
       <div class="sub-pn" id="sp1">
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
+          <button class="btn btn-sm" onclick="clearFilters('wfPubTable')" title="清除所有筛选条件">🔍 清除筛选</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('wfPubTable')">+ 新增任务</button>
           <button class="btn btn-sm" onclick="showBulkImport()">📋 批量新增</button>
         </div>
@@ -464,6 +473,7 @@
       <!-- 子面板 2: 接单明细表 -->
       <div class="sub-pn" id="sp2">
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
+          <button class="btn btn-sm" onclick="clearFilters('wfDetailTable')" title="清除所有筛选条件">🔍 清除筛选</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('wfDetailTable')">+ 新增接单</button>
         </div>
         <div class="cd-b">
@@ -478,6 +488,7 @@
       <!-- 子面板 3: 接单间隔管理表 -->
       <div class="sub-pn" id="sp3">
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
+          <button class="btn btn-sm" onclick="clearFilters('wfIntervalTable')" title="清除所有筛选条件">🔍 清除筛选</button>
           <button class="btn btn-accent btn-sm" onclick="rebuildIntervalTable()">🔄 从明细表同步</button>
         </div>
         <div class="cd-b">
@@ -817,6 +828,7 @@
       <div class="cd-h">
         <div class="cd-hl"><div class="cd-dot" style="background:var(--purple)"></div><h3>异常登记表</h3><span class="sub">· 逐单记录异常详情</span></div>
         <div class="cd-hr">
+          <button class="btn btn-sm" onclick="clearFilters('excTable')" title="清除所有筛选条件">🔍 清除筛选</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('excTable')">+ 新增记录</button>
         </div>
       </div>
@@ -838,6 +850,7 @@
       <div class="cd-h">
         <div class="cd-hl"><div class="cd-dot" style="background:var(--accent)"></div><h3>关键词轮换管理表</h3><span class="sub">· 控制每个关键词的使用频率和间隔</span></div>
         <div class="cd-hr">
+          <button class="btn btn-sm" onclick="clearFilters('kwTable')" title="清除所有筛选条件">🔍 清除筛选</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('kwTable')">+ 新增关键词</button>
         </div>
       </div>
@@ -866,6 +879,7 @@
   </div>
 </div>
 
+<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 <script>
 // ─────────────────────────────────────────────
 // Core: Tab navigation
@@ -1117,20 +1131,79 @@ function renderTable(tableId){
   const data = lsGet(def.storageKey, []);
   const tbody = document.querySelector('#' + tableId + ' tbody');
   if(!tbody) return;
+
+  // Add filter row to thead if not exists
+  const thead = document.querySelector('#' + tableId + ' thead');
+  if(thead && !thead.querySelector('.filter-row')){
+    const filterTr = document.createElement('tr');
+    filterTr.className = 'filter-row';
+    // Empty cell for # column
+    const emptyTd = document.createElement('td');
+    emptyTd.style.width = '40px';
+    filterTr.appendChild(emptyTd);
+    // Filter inputs for each column
+    def.columns.forEach(col => {
+      if(col.key === 'idx'){
+        const td = document.createElement('td');
+        td.style.width = '40px';
+        filterTr.appendChild(td);
+        return;
+      }
+      const td = document.createElement('td');
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = '筛选...';
+      input.dataset.tableId = tableId;
+      input.dataset.colKey = col.key;
+      input.addEventListener('input', function(){ filterTable(tableId); });
+      td.appendChild(input);
+      filterTr.appendChild(td);
+    });
+    // Empty cell for actions column
+    const actTd = document.createElement('td');
+    actTd.style.width = '50px';
+    filterTr.appendChild(actTd);
+    thead.appendChild(filterTr);
+  }
+
+  // Get filter values
+  const filters = {};
+  if(thead){
+    thead.querySelectorAll('.filter-row input').forEach(input => {
+      const val = input.value.trim().toLowerCase();
+      if(val) filters[input.dataset.colKey] = val;
+    });
+  }
+
+  // Filter data
+  let filteredData = data;
+  if(Object.keys(filters).length > 0){
+    filteredData = data.filter(row => {
+      return Object.entries(filters).every(([key, val]) => {
+        const cellVal = String(row[key] || '').toLowerCase();
+        return cellVal.includes(val);
+      });
+    });
+  }
+
   tbody.innerHTML = '';
 
-  if(data.length === 0){
+  if(filteredData.length === 0){
     const tr = document.createElement('tr');
     tr.className = 'empty-row';
     const td = document.createElement('td');
     td.colSpan = def.columns.length + 1;
-    td.textContent = '暂无数据，点击「新增」按钮添加';
+    td.textContent = data.length === 0 ? '暂无数据，点击「新增」按钮添加' : '无匹配数据';
     tr.appendChild(td);
     tbody.appendChild(tr);
     return;
   }
 
-  data.forEach((row, ri) => {
+  // Map filtered data to original indices
+  const filteredIndices = filteredData.map(row => data.indexOf(row));
+
+  filteredData.forEach((row, fi) => {
+    const ri = filteredIndices[fi];
     const tr = document.createElement('tr');
     def.columns.forEach(col => {
       const td = document.createElement('td');
@@ -1315,6 +1388,19 @@ function renderTable(tableId){
     tr.appendChild(actTd);
     tbody.appendChild(tr);
   });
+}
+
+// ─── 筛选功能 ──────────────────────────────
+function filterTable(tableId){
+  renderTable(tableId);
+}
+
+function clearFilters(tableId){
+  const thead = document.querySelector('#' + tableId + ' thead');
+  if(thead){
+    thead.querySelectorAll('.filter-row input').forEach(input => { input.value = ''; });
+  }
+  renderTable(tableId);
 }
 
 function saveCell(tableId, rowIdx, key, value){
@@ -1613,6 +1699,63 @@ function exportData(){
   a.click();
   URL.revokeObjectURL(a.href);
   toast('📥 数据已导出');
+}
+
+// ─── 合并导出 Excel ──────────────────────
+function exportExcel(){
+  if(typeof XLSX === 'undefined'){
+    toast('❌ SheetJS 库未加载，请刷新页面重试', 'error');
+    return;
+  }
+  const wb = XLSX.utils.book_new();
+  const tables = [
+    { id: 'regTable', name: '接单人登记' },
+    { id: 'wfPubTable', name: '任务发布' },
+    { id: 'wfDetailTable', name: '接单明细' },
+    { id: 'wfIntervalTable', name: '接单间隔' },
+    { id: 'errTable', name: '异常登记' },
+    { id: 'kwTable', name: '关键词管理' }
+  ];
+  tables.forEach(t => {
+    const def = TABLE_DEFS[t.id];
+    if(!def) return;
+    const data = lsGet(def.storageKey, []);
+    if(data.length === 0) return;
+    // Build header and rows
+    const headers = def.columns.filter(c => c.key !== 'idx' && c.type !== 'actions').map(c => c.label);
+    const rows = data.map(row => {
+      return def.columns.filter(c => c.key !== 'idx' && c.type !== 'actions').map(c => {
+        const val = row[c.key] || '';
+        // Resolve linked values for display
+        if(c.type === 'linkPerson' && val){
+          const regData = lsGet(LS_PREFIX + 'regTable', []);
+          const person = regData[val];
+          return person ? (person.nickname || person.phone || val) : val;
+        }
+        if(c.type === 'linkPeriod' && val){
+          const pubData = lsGet(LS_PREFIX + 'wfPubTable', []);
+          const task = pubData[val];
+          return task ? (task.taskName || val) : val;
+        }
+        return val;
+      });
+    });
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    // Auto-width columns
+    const colWidths = headers.map((h, i) => {
+      let maxLen = h.length;
+      rows.forEach(r => { maxLen = Math.max(maxLen, String(r[i] || '').length); });
+      return { wch: Math.min(maxLen + 4, 30) };
+    });
+    ws['!cols'] = colWidths;
+    XLSX.utils.book_append_sheet(wb, ws, t.name);
+  });
+  if(wb.SheetNames.length === 0){
+    toast('⚠️ 所有表格均无数据', 'error');
+    return;
+  }
+  XLSX.writeFile(wb, '放单系统数据_' + new Date().toISOString().split('T')[0] + '.xlsx');
+  toast('📊 已导出 ' + wb.SheetNames.length + ' 个工作表');
 }
 
 function importData(event){
