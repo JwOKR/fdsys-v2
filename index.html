@@ -1000,6 +1000,8 @@ const TABLE_DEFS = {
     columns: [
       { key:'idx', label:'#', type:'auto', width:40 },
       { key:'nickname', label:'接单人昵称', type:'text' },
+      { key:'wechatName', label:'微信名', type:'text' },
+      { key:'productCode', label:'产品编号', type:'text' },
       { key:'contact', label:'联系方式', type:'text' },
       { key:'level', label:'账号等级', type:'text' },
       { key:'vip88', label:'88VIP', type:'select', options:['否','是'] },
@@ -1008,7 +1010,7 @@ const TABLE_DEFS = {
       { key:'city', label:'所在城市', type:'text' },
       { key:'note', label:'备注', type:'text' }
     ],
-    empty: { nickname:'',contact:'',level:'',vip88:'否',zhima:'',recent30:'',city:'',note:'' }
+    empty: { nickname:'',wechatName:'',productCode:'',contact:'',level:'',vip88:'否',zhima:'',recent30:'',city:'',note:'' }
   },
   excTable: {
     storageKey: 'excData',
