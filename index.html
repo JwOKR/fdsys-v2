@@ -352,7 +352,7 @@
     <div class="hdr-logo">放</div>
     <div>
       <h1>淘宝天猫 · 放单运营管理系统</h1>
-      <div class="hdr-sub">话术 · 登记 · 检查 · 催收 · 异常 · 关键词 · 福利任务 &mdash; 全模块整合 · 数据可编辑 · 云端永久存储</div>
+      <div class="hdr-sub">话术 · 登记 · 检查 · 催收 · 异常 · 福利任务 &mdash; 全模块整合 · 数据可编辑 · 云端永久存储</div>
     </div>
     <div class="hdr-right">
       <button class="btn btn-sm" id="themeToggle" onclick="toggleTheme()" title="切换明亮/暗黑模式">🌙 暗黑</button>
@@ -387,7 +387,6 @@
     <button class="tab" onclick="go(2)">检查流程</button>
     <button class="tab" onclick="go(3)">催收货流程</button>
     <button class="tab" onclick="go(4)">异常处理</button>
-    <button class="tab" onclick="go(5)">关键词管理</button>
   </div>
 
   <!-- ╔══════════════════════════════════════════╗ -->
@@ -887,28 +886,6 @@
     </div>
   </div>
 
-  <!-- ╔══════════════════════════════════════════╗ -->
-  <!-- ║          PANEL 5 · 关键词管理            ║ -->
-  <!-- ╚══════════════════════════════════════════╝ -->
-  <div class="pn" id="p5">
-
-    <div class="cd">
-      <div class="cd-h">
-        <div class="cd-hl"><div class="cd-dot" style="background:var(--accent)"></div><h3>关键词轮换管理表</h3><span class="sub">· 控制每个关键词的使用频率和间隔</span></div>
-        <div class="cd-hr">
-          <button class="btn btn-sm" onclick="clearFilters('kwTable')" title="清除所有筛选条件">🔍 清除筛选</button>
-          <button class="btn btn-accent btn-sm" onclick="addRow('kwTable')">+ 新增关键词</button>
-        </div>
-      </div>
-      <div class="cd-b">
-        <table id="kwTable">
-          <thead><tr><th style="width:40px">#</th><th>关键词</th><th>搜索人气</th><th>竞争度</th><th>已用次数</th><th>最近使用</th><th>间隔天数</th><th>下次可用</th><th>日上限</th><th>状态</th><th style="width:50px">操作</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="nt"><span class="nt-ico">💡</span><span>使用规则：每个关键词每天 ≤ 3-5单 · 同一关键词间隔 ≥ 3天 · 每周统计效果淘汰低效词、补充新词</span></div>
-    </div>
-  </div>
 
 
 </div>
@@ -1109,22 +1086,6 @@ var TABLE_DEFS = {
       { key:'handler', label:'处理人', type:'text' }
     ],
     empty: { date:'',orderId:'',person:'',excType:'其他',detail:'',solution:'',result:'待处理',handler:'' }
-  },
-  kwTable: {
-    storageKey: 'kwData',
-    columns: [
-      { key:'idx', label:'#', type:'auto', width:40 },
-      { key:'keyword', label:'关键词', type:'text' },
-      { key:'popularity', label:'搜索人气', type:'text' },
-      { key:'competition', label:'竞争度', type:'status', options:['低','中','高'] },
-      { key:'used', label:'已用次数', type:'number' },
-      { key:'lastUsed', label:'最近使用', type:'date' },
-      { key:'interval', label:'间隔天数', type:'text' },
-      { key:'nextAvail', label:'下次可用', type:'text' },
-      { key:'dailyLimit', label:'日上限', type:'text' },
-      { key:'status', label:'状态', type:'status', options:['可用','冷却中','已禁用'] }
-    ],
-    empty: { keyword:'',popularity:'',competition:'低',used:0,lastUsed:'',interval:'3天',nextAvail:'',dailyLimit:'3-5单/天',status:'可用' }
   },
   wfPubTable: {
     storageKey: 'wfPubData',
@@ -1809,7 +1770,6 @@ function computeTaskStatus(row){
 // ─────────────────────────────────────────────
 function updateStats(){
   const reg = lsGet('regData', []);
-  const kw = lsGet('kwData', []);
   const exc = lsGet('excData', []);
   const wfPub = lsGet('wfPubData', []);
   const wfDetail = lsGet('wfDetailData', []);
@@ -1817,14 +1777,12 @@ function updateStats(){
   const totalOrders = reg.length + wfDetail.length;
   const pendingPay = reg.filter(r => r.payStatus === '未结').length + wfDetail.filter(r => !r.payDate).length;
   const excPending = exc.filter(r => r.result === '待处理').length;
-  const kwAvail = kw.filter(r => r.status === '可用').length;
 
   document.getElementById('statsBar').innerHTML = `
     <div class="st"><div class="st-i" style="background:var(--accent-glow);color:var(--accent)">📋</div><div><div class="st-l">接单人总数</div><div class="st-v" style="color:var(--accent)">${reg.length}</div></div></div>
     <div class="st"><div class="st-i" style="background:var(--green-bg);color:var(--green)">📦</div><div><div class="st-l">福利接单</div><div class="st-v" style="color:var(--green)">${wfDetail.length}</div></div></div>
     <div class="st"><div class="st-i" style="background:var(--yellow-bg);color:var(--yellow)">⏳</div><div><div class="st-l">待结算佣金</div><div class="st-v" style="color:var(--yellow)">${pendingPay}</div></div></div>
     <div class="st"><div class="st-i" style="background:var(--red-bg);color:var(--red)">⚠️</div><div><div class="st-l">待处理异常</div><div class="st-v" style="color:var(--red)">${excPending}</div></div></div>
-    <div class="st"><div class="st-i" style="background:var(--blue-bg);color:var(--blue)">🔑</div><div><div class="st-l">可用关键词</div><div class="st-v" style="color:var(--blue)">${kwAvail}</div></div></div>
     <div class="st"><div class="st-i" style="background:var(--purple-bg);color:var(--purple)">🎁</div><div><div class="st-l">福利任务期</div><div class="st-v" style="color:var(--purple)">${wfPub.length}</div></div></div>
   `;
 }
@@ -1910,8 +1868,7 @@ function exportExcel(){
     { id: 'wfPubTable', name: '任务发布' },
     { id: 'wfDetailTable', name: '接单明细' },
     { id: 'wfIntervalTable', name: '接单间隔' },
-    { id: 'errTable', name: '异常登记' },
-    { id: 'kwTable', name: '关键词管理' }
+    { id: 'errTable', name: '异常登记' }
   ];
   tables.forEach(t => {
     const def = TABLE_DEFS[t.id];
@@ -1976,7 +1933,7 @@ function importData(event){
 }
 
 function clearAllData(){
-  openModal('⚠️ 确认重置', '<p style="color:var(--text-2);font-size:13px">此操作将清除所有已保存的数据（话术模板除外），包括：<br><br>· 接单人登记表<br>· 异常登记表<br>· 关键词管理表<br>· 福利任务所有表格<br>· Checklist 状态<br><br><strong style="color:var(--red)">此操作不可撤销！建议先导出备份。</strong></p>',
+  openModal('⚠️ 确认重置', '<p style="color:var(--text-2);font-size:13px">此操作将清除所有已保存的数据（话术模板除外），包括：<br><br>· 接单人登记表<br>· 异常登记表<br>· 福利任务所有表格<br>· Checklist 状态<br><br><strong style="color:var(--red)">此操作不可撤销！建议先导出备份。</strong></p>',
     '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-red" onclick="confirmClear()">确认重置</button>'
   );
 }
