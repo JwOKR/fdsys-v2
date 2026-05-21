@@ -196,9 +196,12 @@
 
   /* ── Filter row ── */
   .filter-row td{padding:4px 6px;background:var(--surface-2);border-bottom:1px solid var(--border)}
-  .filter-row input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:4px 6px;color:var(--text);font-size:11px;font-family:var(--sans);outline:0;transition:border-color .15s}
-  .filter-row input:focus{border-color:var(--accent)}
+  .filter-row input,.filter-row select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:4px 6px;color:var(--text);font-size:11px;font-family:var(--sans);outline:0;transition:border-color .15s;cursor:pointer}
+  .filter-row input:focus,.filter-row select:focus{border-color:var(--accent)}
   .filter-row input::placeholder{color:var(--text-4)}
+  .filter-row select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%237a80a0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;padding-right:20px}
+  .filter-row select option{background:var(--surface-2);color:var(--text)}
+  .filter-row select.f-active{border-color:var(--accent);color:var(--accent)}
 
   /* ── Badge ── */
   .b{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:6px;font-size:11px;font-weight:500;white-space:nowrap}
@@ -1198,16 +1201,28 @@ function renderTable(tableId){
   const tbody = document.querySelector('#' + tableId + ' tbody');
   if(!tbody) return;
 
-  // Add filter row to thead if not exists
+  // Build filter row (always rebuild to reflect latest data)
   const thead = document.querySelector('#' + tableId + ' thead');
-  if(thead && !thead.querySelector('.filter-row')){
+  if(thead){
+    const existingFilter = thead.querySelector('.filter-row');
+    if(existingFilter) existingFilter.remove();
     const filterTr = document.createElement('tr');
     filterTr.className = 'filter-row';
     // Empty cell for # column
     const emptyTd = document.createElement('td');
     emptyTd.style.width = '40px';
     filterTr.appendChild(emptyTd);
-    // Filter inputs for each column
+    // Collect unique values per column for dropdowns
+    const uniqueMap = {};
+    def.columns.forEach(col => { if(col.key !== 'idx') uniqueMap[col.key] = new Set(); });
+    data.forEach(row => {
+      def.columns.forEach(col => {
+        if(col.key !== 'idx' && row[col.key] !== undefined && row[col.key] !== ''){
+          uniqueMap[col.key].add(String(row[col.key]));
+        }
+      });
+    });
+    // Build filter element for each column
     def.columns.forEach(col => {
       if(col.key === 'idx'){
         const td = document.createElement('td');
@@ -1216,13 +1231,49 @@ function renderTable(tableId){
         return;
       }
       const td = document.createElement('td');
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = '筛选...';
-      input.dataset.tableId = tableId;
-      input.dataset.colKey = col.key;
-      input.addEventListener('input', function(){ filterTable(tableId); });
-      td.appendChild(input);
+      // Determine options: use column options for select/status, else use unique data values
+      let options = [];
+      if(col.options && (col.type === 'select' || col.type === 'status')){
+        options = col.options;
+      } else if(col.type === 'linkPeriod'){
+        const pubData = lsGet('wfPubData', []);
+        options = pubData.map(p => computeTaskName(p)).filter(Boolean);
+      } else if(col.type === 'linkPerson'){
+        const regData = lsGet('regData', []);
+        options = regData.map(r => r.nickname).filter(Boolean);
+      } else if(col.type === 'computed-status'){
+        options = ['未开始','进行中','已满员'];
+      } else if(col.type === 'computed-canjoin'){
+        options = ['可接','未满'];
+      } else {
+        options = Array.from(uniqueMap[col.key] || []).sort();
+      }
+      if(options.length > 0){
+        const sel = document.createElement('select');
+        sel.dataset.tableId = tableId;
+        sel.dataset.colKey = col.key;
+        const allOpt = document.createElement('option');
+        allOpt.value = ''; allOpt.textContent = '全部';
+        sel.appendChild(allOpt);
+        options.forEach(opt => {
+          const o = document.createElement('option');
+          o.value = opt; o.textContent = opt;
+          sel.appendChild(o);
+        });
+        sel.addEventListener('change', function(){
+          filterTable(tableId);
+          this.classList.toggle('f-active', this.value !== '');
+        });
+        td.appendChild(sel);
+      } else {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = '筛选...';
+        input.dataset.tableId = tableId;
+        input.dataset.colKey = col.key;
+        input.addEventListener('input', function(){ filterTable(tableId); });
+        td.appendChild(input);
+      }
       filterTr.appendChild(td);
     });
     // Empty cell for actions column
@@ -1235,6 +1286,10 @@ function renderTable(tableId){
   // Get filter values
   const filters = {};
   if(thead){
+    thead.querySelectorAll('.filter-row select').forEach(sel => {
+      const val = sel.value.trim().toLowerCase();
+      if(val) filters[sel.dataset.colKey] = val;
+    });
     thead.querySelectorAll('.filter-row input').forEach(input => {
       const val = input.value.trim().toLowerCase();
       if(val) filters[input.dataset.colKey] = val;
@@ -1246,8 +1301,22 @@ function renderTable(tableId){
   if(Object.keys(filters).length > 0){
     filteredData = data.filter(row => {
       return Object.entries(filters).every(([key, val]) => {
-        const cellVal = String(row[key] || '').toLowerCase();
-        return cellVal.includes(val);
+        // For computed columns, compute the display value
+        let cellVal = '';
+        const col = def.columns.find(c => c.key === key);
+        if(col){
+          if(col.type === 'computed-status') cellVal = computeTaskStatus(row);
+          else if(col.type === 'computed-canjoin') cellVal = computeCanJoin(row.lastDate) ? '可接' : '未满';
+          else if(col.type === 'computed-joined') cellVal = computeJoined(row);
+          else if(col.type === 'computed-remain') cellVal = computeRemain(row);
+          else if(col.type === 'computed-taskname') cellVal = computeTaskName(row);
+          else if(col.type === 'computed-interval') cellVal = computeInterval(row.lastDate);
+          else if(col.type === 'computed-next') cellVal = computeNextDate(row.lastDate);
+          else cellVal = String(row[key] || '');
+        } else {
+          cellVal = String(row[key] || '');
+        }
+        return cellVal.toLowerCase().includes(val);
       });
     });
   }
@@ -1473,6 +1542,7 @@ function clearFilters(tableId){
   const thead = document.querySelector('#' + tableId + ' thead');
   if(thead){
     thead.querySelectorAll('.filter-row input').forEach(input => { input.value = ''; });
+    thead.querySelectorAll('.filter-row select').forEach(sel => { sel.value = ''; sel.classList.remove('f-active'); });
   }
   renderTable(tableId);
 }
