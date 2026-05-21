@@ -1870,7 +1870,7 @@ function confirmClear(){
 }
 
 // ─────────────────────────────────────────────
-// Cloud Sync (Gitee Gist)
+// Cloud Sync (GitHub Gist)
 // ─────────────────────────────────────────────
 const CLOUD_PREFIX = 'fdsys_cloud_'; // separate from data prefix to survive reset
 let cloudPat = localStorage.getItem(CLOUD_PREFIX + 'pat') || '';
@@ -1915,16 +1915,17 @@ function loadCloudData(data){
   loadAll();
 }
 
-// ── Gitee Gist API ──
-const GITEE_API = 'https://gitee.com/api/v5';
+// ── GitHub Gist API ──
+const GH_API = 'https://api.github.com';
+const ghHeaders = () => ({ 'Authorization': 'token ' + cloudPat, 'Content-Type': 'application/json' });
 
 async function createGist(data){
-  const resp = await fetch(GITEE_API + '/gists?access_token=' + cloudPat, {
+  const resp = await fetch(GH_API + '/gists', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: ghHeaders(),
     body: JSON.stringify({
-      description: '放单运营管理系统 - 数据备份',
-      public: 'false',
+      description: '放单运营管理系统 - 数据备份 (自动同步)',
+      public: false,
       files: { 'fdsys-data.json': { content: JSON.stringify(data, null, 2) } }
     })
   });
@@ -1934,9 +1935,9 @@ async function createGist(data){
 }
 
 async function updateGist(gid, data){
-  const resp = await fetch(GITEE_API + '/gists/' + gid + '?access_token=' + cloudPat, {
+  const resp = await fetch(GH_API + '/gists/' + gid, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: ghHeaders(),
     body: JSON.stringify({
       files: { 'fdsys-data.json': { content: JSON.stringify(data, null, 2) } }
     })
@@ -1946,28 +1947,16 @@ async function updateGist(gid, data){
 }
 
 async function readGist(gid){
-  const resp = await fetch(GITEE_API + '/gists/' + gid + '?access_token=' + cloudPat);
+  const resp = await fetch(GH_API + '/gists/' + gid, { headers: ghHeaders() });
   if(!resp.ok) throw new Error('读取Gist失败: ' + resp.status);
   const gist = await resp.json();
-  const files = gist.files;
-  if(!files) throw new Error('Gist中无数据文件');
-  // Gitee files 可能是对象 {filename: {content}} 或数组 [{filename, content}]
-  let fileData;
-  if(Array.isArray(files)){
-    const f = files.find(f => f.filename === 'fdsys-data.json' || f.file_name === 'fdsys-data.json');
-    if(f) fileData = f;
-  } else {
-    fileData = files['fdsys-data.json'];
-  }
-  if(!fileData) throw new Error('Gist中无数据文件');
-  if(fileData.content) return JSON.parse(fileData.content);
+  const file = gist.files && gist.files['fdsys-data.json'];
+  if(!file) throw new Error('Gist中无数据文件');
+  if(file.content) return JSON.parse(file.content);
   // Fallback: fetch raw content
-  if(fileData.raw_url){
-    const rawResp = await fetch(fileData.raw_url);
-    if(!rawResp.ok) throw new Error('读取文件内容失败');
-    return JSON.parse(await rawResp.text());
-  }
-  throw new Error('无法读取文件内容');
+  const rawResp = await fetch(file.raw_url);
+  if(!rawResp.ok) throw new Error('读取文件内容失败');
+  return JSON.parse(await rawResp.text());
 }
 
 async function cloudPush(){
@@ -2073,12 +2062,12 @@ function debouncePush(){
 function showCloudSetup(){
   const connected = !!cloudPat;
   openModal('☁️ 云端同步设置', `
-    <p style="color:var(--text-2);font-size:12.5px;margin-bottom:14px">数据通过 <strong>Gitee Gist</strong> 私密存储，永久保存，换设备也能用。</p>
+    <p style="color:var(--text-2);font-size:12.5px;margin-bottom:14px">数据通过 <strong>GitHub Gist</strong> 私密存储，永久保存，换设备也能用。</p>
     <div class="form-row">
-      <label>Gitee 个人令牌 (Personal Access Token)</label>
-      <input type="password" class="form-input" id="inputPat" placeholder="粘贴你的 Gitee Token" value="${cloudPat}">
+      <label>GitHub 个人令牌 (Personal Access Token)</label>
+      <input type="password" class="form-input" id="inputPat" placeholder="粘贴你的 GitHub Token" value="${cloudPat}">
       <div style="font-size:10.5px;color:var(--text-4);margin-top:5px">
-        需要 <strong>gists</strong> 权限。去 <a href="https://gitee.com/profile/personal_access_tokens/new?scopes=gists&description=放单系统同步" target="_blank" style="color:var(--accent)">创建令牌 →</a>
+        需要 <strong>gist</strong> 权限。去 <a href="https://github.com/settings/tokens/new?scopes=gist&description=放单系统同步" target="_blank" style="color:var(--accent)">创建令牌 →</a>
       </div>
     </div>
     <div class="form-row">
@@ -2097,7 +2086,7 @@ async function testCloudConnection(){
   const pat = document.getElementById('inputPat').value.trim();
   if(!pat){ toast('请输入 Token', 'error'); return; }
   try {
-    const resp = await fetch(GITEE_API + '/user?access_token=' + pat);
+    const resp = await fetch(GH_API + '/user', { headers: { 'Authorization': 'token ' + pat } });
     if(!resp.ok) throw new Error('认证失败');
     const user = await resp.json();
     toast('✅ 连接成功：' + user.login);
@@ -2115,12 +2104,12 @@ async function saveCloudSetup(){
   updateSyncUI('sync', '⏳ 正在验证...');
   try {
     // Verify token
-    const resp = await fetch(GITEE_API + '/user?access_token=' + pat);
+    const resp = await fetch(GH_API + '/user', { headers: { 'Authorization': 'token ' + pat } });
     if(!resp.ok) throw new Error('Token 无效');
     // If no gist ID, try to find existing gist or create new one
     if(!gid){
       // Search for existing gist
-      const gistsResp = await fetch(GITEE_API + '/gists?access_token=' + pat);
+      const gistsResp = await fetch(GH_API + '/gists', { headers: { 'Authorization': 'token ' + pat } });
       const gists = await gistsResp.json();
       const existing = gists.find(g => g.description && g.description.includes('放单运营管理系统'));
       if(existing){
@@ -2145,7 +2134,7 @@ async function saveCloudSetup(){
 
 function initCloudSync(){
   if(!cloudPat){
-    updateSyncUI('off', '☁️ 云端同步：未连接 · <span style="color:var(--accent);cursor:pointer" onclick="showCloudSetup()">点击设置</span> 数据永久保存到 Gitee Gist');
+    updateSyncUI('off', '☁️ 云端同步：未连接 · <span style="color:var(--accent);cursor:pointer" onclick="showCloudSetup()">点击设置</span> 数据永久保存到 GitHub Gist');
     return;
   }
   // Auto pull on page load
@@ -2153,12 +2142,12 @@ function initCloudSync(){
     updateSyncUI('sync', '⏳ 正在同步...');
     try {
       // Verify token
-      const resp = await fetch(GITEE_API + '/user?access_token=' + cloudPat);
+      const resp = await fetch(GH_API + '/user', { headers: { 'Authorization': 'token ' + cloudPat } });
       if(!resp.ok) throw new Error('Token 失效');
       const user = await resp.json();
       if(!gistId){
         // Try to find existing gist
-        const gistsResp = await fetch(GITEE_API + '/gists?access_token=' + cloudPat);
+        const gistsResp = await fetch(GH_API + '/gists', { headers: { 'Authorization': 'token ' + cloudPat } });
         const gists = await gistsResp.json();
         const existing = gists.find(g => g.description && g.description.includes('放单运营管理系统'));
         if(existing){
