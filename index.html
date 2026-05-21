@@ -440,7 +440,7 @@
         </div>
         <div class="cd-b">
           <table id="regTable">
-            <thead><tr><th style="width:40px">#</th><th>接单人昵称</th><th>联系方式</th><th>账号等级</th><th>88VIP</th><th>芝麻信用</th><th>近30天同类目</th><th>所在城市</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
+            <thead><tr><th style="width:40px">#</th><th>接单人昵称</th><th>微信名</th><th>联系方式</th><th>账号等级</th><th>88VIP</th><th>芝麻信用</th><th>近30天同类目</th><th>所在城市</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -454,7 +454,7 @@
         </div>
         <div class="cd-b">
           <table id="wfPubTable">
-            <thead><tr><th style="width:40px">#</th><th>期数</th><th>发布日期</th><th>商品名称</th><th>淘口令</th><th>商品价格</th><th>基础佣金</th><th>晒单奖励</th><th>限接人数</th><th>已接人数</th><th>剩余名额</th><th>状态</th><th style="width:50px">操作</th></tr></thead>
+            <thead><tr><th style="width:40px">#</th><th>期数</th><th>发布日期</th><th>商品名称</th><th>产品编号</th><th>淘口令</th><th>商品价格</th><th>基础佣金</th><th>晒单奖励</th><th>限接人数</th><th>已接人数</th><th>剩余名额</th><th>状态</th><th style="width:50px">操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -467,11 +467,11 @@
         </div>
         <div class="cd-b">
           <table id="wfDetailTable">
-            <thead><tr><th style="width:40px">#</th><th>期数</th><th>接单日期</th><th><span style="color:var(--accent)">选择接单人</span></th><th>淘宝昵称</th><th>联系方式</th><th>下单时间</th><th>订单编号</th><th>实付</th><th>快递单号</th><th>签收</th><th>确认收货</th><th>好评</th><th>晒单</th><th>基础返款</th><th>晒单奖</th><th>总返款</th><th>返款日期</th><th>付款方式</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
+            <thead><tr><th style="width:40px">#</th><th>期数</th><th>接单日期</th><th><span style="color:var(--accent)">选择接单人</span></th><th>淘宝昵称</th><th>微信名</th><th>联系方式</th><th>商品名称</th><th>产品编号</th><th>下单时间</th><th>订单编号</th><th>实付</th><th>快递单号</th><th>签收</th><th>确认收货</th><th>好评</th><th>晒单</th><th>基础返款</th><th>晒单奖</th><th>总返款</th><th>返款日期</th><th>付款方式</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
-        <div class="nt"><span class="nt-ico">🔗</span><span>联动功能：从「选择接单人」下拉框选择已登记的接单人，自动填充昵称和联系方式 · 新增接单自动更新间隔管理表和发布管理表</span></div>
+        <div class="nt"><span class="nt-ico">🔗</span><span>联动功能：选择「期数」自动关联任务（商品名称、产品编号、基础返款、晒单奖） · 选择「接单人」自动填充（淘宝昵称、微信名、联系方式）</span></div>
       </div>
 
       <!-- 子面板 3: 接单间隔管理表 -->
@@ -1065,11 +1065,14 @@ const TABLE_DEFS = {
     storageKey: 'wfDetailData',
     columns: [
       { key:'idx', label:'#', type:'auto', width:40 },
-      { key:'period', label:'期数', type:'text' },
+      { key:'period', label:'期数', type:'linkPeriod' },
       { key:'date', label:'接单日期', type:'date' },
       { key:'linkPerson', label:'选择接单人', type:'linkPerson' },
       { key:'nickname', label:'淘宝昵称', type:'text' },
+      { key:'wechatName', label:'微信名', type:'text' },
       { key:'contact', label:'联系方式', type:'text' },
+      { key:'product', label:'商品名称', type:'text', readonly:true },
+      { key:'productCode', label:'产品编号', type:'text', readonly:true },
       { key:'orderTime', label:'下单时间', type:'text' },
       { key:'orderId', label:'订单编号', type:'text' },
       { key:'paid', label:'实付', type:'text' },
@@ -1085,7 +1088,7 @@ const TABLE_DEFS = {
       { key:'payMethod', label:'付款方式', type:'status', options:['余额','储蓄卡','余额宝','信用卡(违规)','花呗(违规)'] },
       { key:'note', label:'备注', type:'text' }
     ],
-    empty: { period:'',date:'',linkPerson:'',nickname:'',contact:'',orderTime:'',orderId:'',paid:'',tracking:'',delivery:'未发货',confirm:'未确认',review:'未评价',photoReview:'未晒单',basePay:'',bonusPay:'',totalPay:'',payDate:'',payMethod:'余额',note:'' }
+    empty: { period:'',date:'',linkPerson:'',nickname:'',wechatName:'',contact:'',product:'',productCode:'',orderTime:'',orderId:'',paid:'',tracking:'',delivery:'未发货',confirm:'未确认',review:'未评价',photoReview:'未晒单',basePay:'',bonusPay:'',totalPay:'',payDate:'',payMethod:'余额',note:'' }
   },
   wfIntervalTable: {
     storageKey: 'wfIntervalData',
@@ -1192,19 +1195,61 @@ function renderTable(tableId){
           const regIdx = parseInt(this.value);
           saveCell(tableId, ri, 'linkPerson', this.value);
           if(!isNaN(regIdx) && regData[regIdx]){
-            // Auto-fill nickname and contact
+            // Auto-fill from regData
             const reg = regData[regIdx];
             saveCell(tableId, ri, 'nickname', reg.nickname || '');
+            saveCell(tableId, ri, 'wechatName', reg.wechatName || '');
             saveCell(tableId, ri, 'contact', reg.contact || '');
             // Update visible cells
-            const row = tr;
-            row.querySelectorAll('td[data-key]').forEach(cell => {
+            tr.querySelectorAll('td[data-key]').forEach(cell => {
               if(cell.dataset.key === 'nickname') cell.textContent = reg.nickname || '';
+              if(cell.dataset.key === 'wechatName') cell.textContent = reg.wechatName || '';
               if(cell.dataset.key === 'contact') cell.textContent = reg.contact || '';
             });
             // Auto-sync to interval table
-            syncIntervalFromDetail(reg.nickname || '', row.date || '', row.period || '');
+            const curRow = data[ri];
+            syncIntervalFromDetail(reg.nickname || '', curRow.date || '', curRow.period || '');
             toast('✅ 已自动填充：' + (reg.nickname||''));
+          }
+        });
+        td.appendChild(sel);
+      } else if(col.type === 'linkPeriod'){
+        // 期数下拉，从任务发布表拉取
+        const sel = document.createElement('select');
+        sel.className = 'inline-select';
+        sel.style.minWidth = '100px';
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = ''; defaultOpt.textContent = '-- 选择期数 --';
+        sel.appendChild(defaultOpt);
+        const pubData = lsGet('wfPubData', []);
+        pubData.forEach((pub, pubIdx) => {
+          const o = document.createElement('option');
+          o.value = pub.period || '';
+          o.textContent = (pub.period || '第' + (pubIdx+1) + '期') + (pub.product ? ' - ' + pub.product : '');
+          if(row.period && row.period === pub.period) o.selected = true;
+          sel.appendChild(o);
+        });
+        sel.dataset.row = ri;
+        sel.dataset.key = col.key;
+        sel.addEventListener('change', function(){
+          const selectedPeriod = this.value;
+          saveCell(tableId, ri, 'period', selectedPeriod);
+          if(selectedPeriod){
+            const pub = pubData.find(p => p.period === selectedPeriod);
+            if(pub){
+              // Auto-fill from pubData
+              saveCell(tableId, ri, 'product', pub.product || '');
+              saveCell(tableId, ri, 'productCode', pub.productCode || '');
+              saveCell(tableId, ri, 'basePay', pub.commission || '');
+              saveCell(tableId, ri, 'bonusPay', pub.bonus || '');
+              tr.querySelectorAll('td[data-key]').forEach(cell => {
+                if(cell.dataset.key === 'product') cell.textContent = pub.product || '';
+                if(cell.dataset.key === 'productCode') cell.textContent = pub.productCode || '';
+                if(cell.dataset.key === 'basePay') cell.textContent = pub.commission || '';
+                if(cell.dataset.key === 'bonusPay') cell.textContent = pub.bonus || '';
+              });
+              toast('✅ 已关联任务：' + selectedPeriod);
+            }
           }
         });
         td.appendChild(sel);
