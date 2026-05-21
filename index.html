@@ -440,11 +440,11 @@
         </div>
         <div class="cd-b">
           <table id="regTable">
-            <thead><tr><th style="width:40px">#</th><th>接单人昵称</th><th>联系方式</th><th>账号等级</th><th>88VIP</th><th>芝麻信用</th><th>近30天同类目</th><th>所在城市</th><th>放单日期</th><th>商品名称</th><th>关键词</th><th>订单编号</th><th>拍下金额</th><th>佣金</th><th>快递单号</th><th>签收状态</th><th>确认收货</th><th>好评</th><th>佣金结算</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
+            <thead><tr><th style="width:40px">#</th><th>接单人昵称</th><th>联系方式</th><th>账号等级</th><th>88VIP</th><th>芝麻信用</th><th>近30天同类目</th><th>所在城市</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
-        <div class="nt"><span class="nt-ico">💡</span><span>状态列可点击切换 · 点击单元格可直接编辑 · 新增接单人自动同步到间隔管理表</span></div>
+        <div class="nt"><span class="nt-ico">💡</span><span>纯身份信息登记 · 订单详情请在「接单明细」子标签中管理 · 新增接单人自动同步到间隔管理表</span></div>
       </div>
 
       <!-- 子面板 1: 福利任务发布管理表 -->
@@ -476,13 +476,16 @@
 
       <!-- 子面板 3: 接单间隔管理表 -->
       <div class="sub-pn" id="sp3">
+        <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
+          <button class="btn btn-accent btn-sm" onclick="rebuildIntervalTable()">🔄 从明细表同步</button>
+        </div>
         <div class="cd-b">
           <table id="wfIntervalTable">
             <thead><tr><th style="width:40px">#</th><th>淘宝昵称</th><th>上次接单日期</th><th>上次期数</th><th>距今天数</th><th>间隔要求</th><th>下次可接日期</th><th>是否可接</th><th style="width:50px">操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
-        <div class="nt"><span class="nt-ico">📅</span><span>间隔公式：距今天数 = 今天 - 上次接单日期 · ≥ 12 → 可接 · < 12 → 需等待 (12 - 距今天数) 天</span></div>
+        <div class="nt"><span class="nt-ico">📅</span><span>自动从「接单明细」推算 · 点击「从明细表同步」刷新 · ≥ 12天可接 · < 12天需等待</span></div>
       </div>
     </div>
 
@@ -1003,20 +1006,9 @@ const TABLE_DEFS = {
       { key:'zhima', label:'芝麻信用', type:'text' },
       { key:'recent30', label:'近30天同类目', type:'text' },
       { key:'city', label:'所在城市', type:'text' },
-      { key:'date', label:'放单日期', type:'date' },
-      { key:'product', label:'商品名称', type:'text' },
-      { key:'keyword', label:'关键词', type:'text' },
-      { key:'orderId', label:'订单编号', type:'text' },
-      { key:'amount', label:'拍下金额', type:'text' },
-      { key:'commission', label:'佣金', type:'text' },
-      { key:'tracking', label:'快递单号', type:'text' },
-      { key:'delivery', label:'签收状态', type:'status', options:['未发货','运输中','已签收'] },
-      { key:'confirm', label:'确认收货', type:'status', options:['未确认','已确认'] },
-      { key:'review', label:'好评', type:'status', options:['未评价','已好评','已晒图'] },
-      { key:'payStatus', label:'佣金结算', type:'status', options:['未结','已结','已拒付'] },
       { key:'note', label:'备注', type:'text' }
     ],
-    empty: { nickname:'',contact:'',level:'',vip88:'否',zhima:'',recent30:'',city:'',date:'',product:'',keyword:'',orderId:'',amount:'',commission:'',tracking:'',delivery:'未发货',confirm:'未确认',review:'未评价',payStatus:'未结',note:'' }
+    empty: { nickname:'',contact:'',level:'',vip88:'否',zhima:'',recent30:'',city:'',note:'' }
   },
   excTable: {
     storageKey: 'excData',
@@ -1294,6 +1286,10 @@ function confirmDelete(tableId, rowIdx){
   closeModal();
   debouncePush();
   toast('🗑 已删除');
+  // Auto-sync: rebuild interval table after detail/reg deletion
+  if(tableId === 'wfDetailTable' || tableId === 'regTable'){
+    rebuildIntervalTable();
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -1330,6 +1326,37 @@ function syncIntervalFromReg(nickname){
     renderTable('wfIntervalTable');
     debouncePush();
   }
+}
+
+/**
+ * rebuildIntervalTable - 从明细表全量重建间隔管理表
+ * 扫描 wfDetailData，按昵称分组，取每人的最新日期和期数
+ */
+function rebuildIntervalTable(){
+  const details = lsGet('wfDetailData', []);
+  const reg = lsGet('regData', []);
+  // 收集所有已登记的昵称（来自登记表）
+  const regNicknames = new Set(reg.map(r => r.nickname).filter(Boolean));
+  // 从明细表提取每个昵称的最新接单记录
+  const latestMap = {}; // nickname -> { lastDate, lastPeriod }
+  details.forEach(d => {
+    if(!d.nickname) return;
+    const cur = latestMap[d.nickname];
+    if(!cur || (d.date && d.date > cur.lastDate)){
+      latestMap[d.nickname] = { lastDate: d.date || '', lastPeriod: d.period || '' };
+    }
+  });
+  // 合并：登记表所有人 + 明细表出现但不在登记表的人
+  const allNicknames = new Set([...regNicknames, ...Object.keys(latestMap)]);
+  const intervals = [];
+  allNicknames.forEach(nick => {
+    const info = latestMap[nick] || { lastDate:'', lastPeriod:'' };
+    intervals.push({ nickname:nick, lastDate:info.lastDate, lastPeriod:info.lastPeriod });
+  });
+  lsSet('wfIntervalData', intervals);
+  renderTable('wfIntervalTable');
+  toast('🔄 间隔管理表已从明细表重建，共 ' + intervals.length + ' 人');
+  debouncePush();
 }
 
 // ─────────────────────────────────────────────
