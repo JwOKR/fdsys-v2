@@ -1758,7 +1758,8 @@ function exportData(){
   for(let i=0; i<localStorage.length; i++){
     const k = localStorage.key(i);
     if(k.startsWith(LS_PREFIX)){
-      all[k.replace(LS_PREFIX, '')] = JSON.parse(localStorage.getItem(k));
+      const raw = localStorage.getItem(k);
+      try { all[k.replace(LS_PREFIX, '')] = JSON.parse(raw); } catch(e) { all[k.replace(LS_PREFIX, '')] = raw; }
     }
   }
   const blob = new Blob([JSON.stringify(all, null, 2)], {type:'application/json'});
@@ -1894,7 +1895,8 @@ function gatherAllData(){
   for(let i=0; i<localStorage.length; i++){
     const k = localStorage.key(i);
     if(k.startsWith(LS_PREFIX)){
-      all[k.replace(LS_PREFIX, '')] = JSON.parse(localStorage.getItem(k));
+      const raw = localStorage.getItem(k);
+      try { all[k.replace(LS_PREFIX, '')] = JSON.parse(raw); } catch(e) { all[k.replace(LS_PREFIX, '')] = raw; }
     }
   }
   all['_cloud_meta'] = { lastModified: new Date().toISOString(), version: 2 };
