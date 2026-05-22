@@ -1998,12 +1998,20 @@ function showBatchPaste(tableId){
   const editableCols = def.columns.filter(c =>
     c.type === 'text' || c.type === 'number' || c.type === 'date' || c.type === 'select' || c.type === 'status'
   );
-  const colLabels = editableCols.map(c => c.label).join('、');
+  // Column checkboxes
+  let colChecks = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">';
+  editableCols.forEach((c, i) => {
+    colChecks += '<label style="display:flex;align-items:center;gap:4px;padding:4px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;font-size:11.5px;cursor:pointer;user-select:none">';
+    colChecks += '<input type="checkbox" class="batch-col-cb" data-key="' + c.key + '" data-idx="' + i + '" checked style="accent-color:var(--accent)">';
+    colChecks += c.label + '</label>';
+  });
+  colChecks += '</div>';
   const html = `
     <div style="margin-bottom:14px">
       <p style="color:var(--text-2);font-size:13px;margin-bottom:6px">从 Excel 复制数据后粘贴到下方（每行一条记录，列之间用 <strong>Tab</strong> 分隔）</p>
-      <p style="color:var(--text-4);font-size:11.5px;margin-bottom:10px">可填充列：${colLabels}</p>
-      <textarea id="batchPasteData" rows="10" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:var(--mono);font-size:12px;resize:vertical;tab-size:4" placeholder="粘贴 Excel 数据到这里...\n示例（Tab 分隔）：\n张三\t小三\t13800000000\t3心\t否\t650\t2\t北京"></textarea>
+      <p style="color:var(--text-4);font-size:11.5px;margin-bottom:8px">勾选要填充的列（粘贴数据按勾选顺序对应）：</p>
+      ${colChecks}
+      <textarea id="batchPasteData" rows="10" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:var(--mono);font-size:12px;resize:vertical;tab-size:4" placeholder="粘贴 Excel 数据到这里...\n例如只粘贴昵称和联系方式两列：\n张三\t13800000000\n李四\t13900000000"></textarea>
     </div>
     <div id="batchPastePreview" style="color:var(--text-3);font-size:12px"></div>
   `;
@@ -2013,26 +2021,39 @@ function showBatchPaste(tableId){
   );
 }
 
-function previewBatchPaste(){
+function getSelectedBatchCols(){
   const tableId = window._batchPasteTableId;
   const def = TABLE_DEFS[tableId];
-  const textarea = document.getElementById('batchPasteData');
-  const preview = document.getElementById('batchPastePreview');
-  if(!textarea || !preview || !def) return;
-  const lines = textarea.value.trim().split('\n').filter(l => l.trim());
-  if(lines.length === 0){ preview.innerHTML = '<span style="color:var(--red)">请粘贴数据</span>'; return; }
   const editableCols = def.columns.filter(c =>
     c.type === 'text' || c.type === 'number' || c.type === 'date' || c.type === 'select' || c.type === 'status'
   );
+  const selected = [];
+  document.querySelectorAll('.batch-col-cb').forEach(cb => {
+    if(cb.checked){
+      const idx = parseInt(cb.dataset.idx);
+      if(editableCols[idx]) selected.push(editableCols[idx]);
+    }
+  });
+  return selected;
+}
+
+function previewBatchPaste(){
+  const textarea = document.getElementById('batchPasteData');
+  const preview = document.getElementById('batchPastePreview');
+  if(!textarea || !preview) return;
+  const lines = textarea.value.trim().split('\n').filter(l => l.trim());
+  if(lines.length === 0){ preview.innerHTML = '<span style="color:var(--red)">请粘贴数据</span>'; return; }
+  const selCols = getSelectedBatchCols();
+  if(selCols.length === 0){ preview.innerHTML = '<span style="color:var(--red)">请至少勾选一列</span>'; return; }
   let html = '<div style="margin-top:8px;padding:10px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;max-height:200px;overflow:auto">';
-  html += '<div style="font-weight:600;margin-bottom:6px;color:var(--text-2)">预览（' + lines.length + ' 行）：</div>';
+  html += '<div style="font-weight:600;margin-bottom:6px;color:var(--text-2)">预览（' + lines.length + ' 行 × ' + selCols.length + ' 列）：</div>';
   html += '<table style="font-size:11px;width:100%;border-collapse:collapse"><thead><tr>';
-  editableCols.forEach(c => { html += '<th style="padding:3px 6px;border-bottom:1px solid var(--border);text-align:left;color:var(--text-3)">' + c.label + '</th>'; });
+  selCols.forEach(c => { html += '<th style="padding:3px 6px;border-bottom:1px solid var(--border);text-align:left;color:var(--text-3)">' + c.label + '</th>'; });
   html += '</tr></thead><tbody>';
-  lines.forEach((line, i) => {
+  lines.forEach(line => {
     const cells = line.split('\t');
     html += '<tr>';
-    editableCols.forEach((c, j) => {
+    selCols.forEach((c, j) => {
       const val = cells[j] || '';
       html += '<td style="padding:3px 6px;border-bottom:1px solid rgba(42,48,80,.3);color:var(--text-2)">' + (val || '<span style="color:var(--text-4)">-</span>') + '</td>';
     });
@@ -2049,12 +2070,12 @@ function doBatchPaste(){
   if(!textarea || !def) return;
   const lines = textarea.value.trim().split('\n').filter(l => l.trim());
   if(lines.length === 0){ toast('请粘贴数据', 'error'); return; }
-  const editableCols = def.columns.filter(c =>
-    c.type === 'text' || c.type === 'number' || c.type === 'date' || c.type === 'select' || c.type === 'status'
-  );
+  const selCols = getSelectedBatchCols();
+  if(selCols.length === 0){ toast('请至少勾选一列', 'error'); return; }
+  const colNames = selCols.map(c => c.label).join('、');
   // Confirm
   openModal('⚠️ 确认批量粘贴',
-    '<p style="color:var(--text-2);font-size:13px">即将向 <strong>' + TABLE_LABELS[tableId] + '</strong> 新增 <strong>' + lines.length + '</strong> 条记录。</p><p style="color:var(--text-3);font-size:12px;margin-top:6px">此操作不可撤销，确认继续？</p>',
+    '<p style="color:var(--text-2);font-size:13px">即将向 <strong>' + TABLE_LABELS[tableId] + '</strong> 新增 <strong>' + lines.length + '</strong> 条记录。</p><p style="color:var(--text-3);font-size:12px;margin-top:6px">填充列：' + colNames + '</p><p style="color:var(--text-3);font-size:12px;margin-top:4px">此操作不可撤销，确认继续？</p>',
     '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-green" onclick="confirmBatchPaste()">确认</button>'
   );
 }
@@ -2065,15 +2086,13 @@ function confirmBatchPaste(){
   const textarea = document.getElementById('batchPasteData');
   if(!textarea || !def) return;
   const lines = textarea.value.trim().split('\n').filter(l => l.trim());
-  const editableCols = def.columns.filter(c =>
-    c.type === 'text' || c.type === 'number' || c.type === 'date' || c.type === 'select' || c.type === 'status'
-  );
+  const selCols = getSelectedBatchCols();
   const data = lsGet(def.storageKey, []);
   let added = 0;
   lines.forEach(line => {
     const cells = line.split('\t');
     const newRow = {...def.empty};
-    editableCols.forEach((col, j) => {
+    selCols.forEach((col, j) => {
       if(cells[j] !== undefined && cells[j].trim() !== ''){
         newRow[col.key] = cells[j].trim();
       }
