@@ -501,7 +501,7 @@
         </div>
         <div class="cd-b">
           <table id="wfDetailTable">
-            <thead><tr><th style="width:40px">#</th><th>期数</th><th>接单日期</th><th><span style="color:var(--accent)">选择接单人</span></th><th>淘宝昵称</th><th>微信名</th><th>联系方式</th><th>商品ID</th><th>产品编号</th><th>下单时间</th><th>订单编号</th><th>实付</th><th>快递单号</th><th>签收</th><th>确认收货</th><th>好评</th><th>晒单</th><th>基础返款</th><th>晒单奖</th><th>总返款</th><th>返款日期</th><th>付款方式</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
+            <thead><tr><th style="width:40px">#</th><th>期数</th><th>接单日期</th><th><span style="color:var(--accent)">选择接单人</span></th><th>淘宝昵称</th><th>微信名</th><th>联系方式</th><th>总返款</th><th>是否已返款</th><th>商品ID</th><th>产品编号</th><th>下单时间</th><th>订单编号</th><th>实付</th><th>快递单号</th><th>签收</th><th>确认收货</th><th>好评</th><th>晒单</th><th>基础返款</th><th>晒单奖</th><th>返款日期</th><th>付款方式</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -1164,6 +1164,8 @@ var TABLE_DEFS = {
       { key:'nickname', label:'淘宝昵称', type:'text' },
       { key:'wechatName', label:'微信名', type:'text' },
       { key:'contact', label:'联系方式', type:'text' },
+      { key:'totalPay', label:'总返款', type:'text' },
+      { key:'paidBack', label:'是否已返款', type:'status', options:['未返','已返'] },
       { key:'product', label:'商品ID', type:'text', readonly:true },
       { key:'productCode', label:'产品编号', type:'text', readonly:true },
       { key:'orderTime', label:'下单时间', type:'text' },
@@ -1176,12 +1178,11 @@ var TABLE_DEFS = {
       { key:'photoReview', label:'晒单', type:'status', options:['未晒单','已晒单'] },
       { key:'basePay', label:'基础返款', type:'text' },
       { key:'bonusPay', label:'晒单奖', type:'text' },
-      { key:'totalPay', label:'总返款', type:'text' },
       { key:'payDate', label:'返款日期', type:'date' },
       { key:'payMethod', label:'付款方式', type:'status', options:['余额','储蓄卡','余额宝','信用卡(违规)','花呗(违规)'] },
       { key:'note', label:'备注', type:'text' }
     ],
-    empty: { period:'',date:'',linkPerson:'',nickname:'',wechatName:'',contact:'',product:'',productCode:'',orderTime:'',orderId:'',paid:'',tracking:'',delivery:'未发货',confirm:'未确认',review:'未评价',photoReview:'未晒单',basePay:'',bonusPay:'',totalPay:'',payDate:'',payMethod:'余额',note:'' }
+    empty: { period:'',date:'',linkPerson:'',nickname:'',wechatName:'',contact:'',totalPay:'',paidBack:'未返',product:'',productCode:'',orderTime:'',orderId:'',paid:'',tracking:'',delivery:'未发货',confirm:'未确认',review:'未评价',photoReview:'未晒单',basePay:'',bonusPay:'',payDate:'',payMethod:'余额',note:'' }
   },
   wfIntervalTable: {
     storageKey: 'wfIntervalData',
