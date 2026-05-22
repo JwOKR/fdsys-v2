@@ -462,6 +462,7 @@
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
           <button class="btn btn-sm" onclick="clearFilters('regTable')" title="清除所有筛选条件">🔍 清除筛选</button>
           <button class="btn btn-sm" onclick="showBatchPaste('regTable')" title="从Excel批量粘贴数据">📋 批量粘贴</button>
+          <button class="btn btn-sm" onclick="showBatchEdit('regTable')" title="批量修改已有数据">✏️ 批量修改</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('regTable')">+ 新增接单人</button>
         </div>
         <div class="cd-b">
@@ -478,6 +479,7 @@
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
           <button class="btn btn-sm" onclick="clearFilters('wfPubTable')" title="清除所有筛选条件">🔍 清除筛选</button>
           <button class="btn btn-sm" onclick="showBatchPaste('wfPubTable')" title="从Excel批量粘贴数据">📋 批量粘贴</button>
+          <button class="btn btn-sm" onclick="showBatchEdit('wfPubTable')" title="批量修改已有数据">✏️ 批量修改</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('wfPubTable')">+ 新增任务</button>
           <button class="btn btn-sm" onclick="showBulkImport()">📋 批量新增</button>
         </div>
@@ -494,6 +496,7 @@
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
           <button class="btn btn-sm" onclick="clearFilters('wfDetailTable')" title="清除所有筛选条件">🔍 清除筛选</button>
           <button class="btn btn-sm" onclick="showBatchPaste('wfDetailTable')" title="从Excel批量粘贴数据">📋 批量粘贴</button>
+          <button class="btn btn-sm" onclick="showBatchEdit('wfDetailTable')" title="批量修改已有数据">✏️ 批量修改</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('wfDetailTable')">+ 新增接单</button>
         </div>
         <div class="cd-b">
@@ -510,6 +513,7 @@
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
           <button class="btn btn-sm" onclick="clearFilters('wfIntervalTable')" title="清除所有筛选条件">🔍 清除筛选</button>
           <button class="btn btn-sm" onclick="showBatchPaste('wfIntervalTable')" title="从Excel批量粘贴数据">📋 批量粘贴</button>
+          <button class="btn btn-sm" onclick="showBatchEdit('wfIntervalTable')" title="批量修改已有数据">✏️ 批量修改</button>
           <button class="btn btn-accent btn-sm" onclick="rebuildIntervalTable()">🔄 从明细表同步</button>
         </div>
         <div class="cd-b">
@@ -851,6 +855,7 @@
         <div class="cd-hr">
           <button class="btn btn-sm" onclick="clearFilters('excTable')" title="清除所有筛选条件">🔍 清除筛选</button>
           <button class="btn btn-sm" onclick="showBatchPaste('excTable')" title="从Excel批量粘贴数据">📋 批量粘贴</button>
+          <button class="btn btn-sm" onclick="showBatchEdit('excTable')" title="批量修改已有数据">✏️ 批量修改</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('excTable')">+ 新增记录</button>
         </div>
       </div>
@@ -2114,6 +2119,163 @@ function confirmBatchPaste(){
   debouncePush();
   addLog('bulk', tableId, '批量粘贴' + added + '条记录');
   toast('✅ 已粘贴 ' + added + ' 条记录');
+}
+
+// ─────────────────────────────────────────────
+// Batch edit existing data
+// ─────────────────────────────────────────────
+function showBatchEdit(tableId){
+  const def = TABLE_DEFS[tableId];
+  if(!def) return;
+  const editableCols = def.columns.filter(c =>
+    c.type === 'text' || c.type === 'number' || c.type === 'date' || c.type === 'select' || c.type === 'status'
+  );
+  let matchOpts = '<option value="">-- 选择匹配列 --</option>';
+  let updateOpts = '<option value="">-- 选择修改列 --</option>';
+  editableCols.forEach(c => {
+    matchOpts += '<option value="' + c.key + '">' + c.label + '</option>';
+    updateOpts += '<option value="' + c.key + '">' + c.label + '</option>';
+  });
+  const html = `
+    <div style="margin-bottom:14px">
+      <p style="color:var(--text-2);font-size:13px;margin-bottom:12px">按条件匹配已有行，批量修改指定列的值</p>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>匹配列（根据哪一列找行）</label>
+          <select class="form-input" id="batchEditMatchCol" onchange="updateBatchEditMatchVals()">${matchOpts}</select>
+        </div>
+        <div class="form-row">
+          <label>匹配值（要修改哪些行）</label>
+          <select class="form-input" id="batchEditMatchVal"><option value="">-- 先选择匹配列 --</option></select>
+        </div>
+      </div>
+      <div class="form-grid" style="margin-top:8px">
+        <div class="form-row">
+          <label>修改列（改哪一列）</label>
+          <select class="form-input" id="batchEditUpdateCol">${updateOpts}</select>
+        </div>
+        <div class="form-row">
+          <label>新值</label>
+          <input type="text" class="form-input" id="batchEditNewVal" placeholder="输入新值">
+        </div>
+      </div>
+    </div>
+    <div id="batchEditPreview" style="color:var(--text-3);font-size:12px"></div>
+  `;
+  window._batchEditTableId = tableId;
+  openModal('✏️ 批量修改 — ' + TABLE_LABELS[tableId], html,
+    '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-accent" onclick="previewBatchEdit()">预览</button><button class="btn btn-green" onclick="doBatchEdit()">确认修改</button>'
+  );
+}
+
+function updateBatchEditMatchVals(){
+  const tableId = window._batchEditTableId;
+  const def = TABLE_DEFS[tableId];
+  const matchCol = document.getElementById('batchEditMatchCol').value;
+  const valSel = document.getElementById('batchEditMatchVal');
+  valSel.innerHTML = '<option value="">-- 选择匹配值 --</option>';
+  if(!matchCol || !def) return;
+  const data = lsGet(def.storageKey, []);
+  const col = def.columns.find(c => c.key === matchCol);
+  const vals = new Set();
+  data.forEach(row => {
+    let v = row[matchCol];
+    // Resolve linkPerson index to nickname
+    if(col && col.type === 'linkPerson' && v !== undefined && v !== ''){
+      const regData = lsGet('regData', []);
+      const idx = parseInt(v);
+      v = (!isNaN(idx) && regData[idx]) ? regData[idx].nickname : v;
+    }
+    if(v !== undefined && v !== '') vals.add(String(v));
+  });
+  Array.from(vals).sort().forEach(v => {
+    const o = document.createElement('option');
+    o.value = v; o.textContent = v;
+    valSel.appendChild(o);
+  });
+}
+
+function getBatchEditMatchedRows(){
+  const tableId = window._batchEditTableId;
+  const def = TABLE_DEFS[tableId];
+  const matchCol = document.getElementById('batchEditMatchCol').value;
+  const matchVal = document.getElementById('batchEditMatchVal').value;
+  if(!matchCol || !matchVal || !def) return [];
+  const data = lsGet(def.storageKey, []);
+  const col = def.columns.find(c => c.key === matchCol);
+  const matched = [];
+  data.forEach((row, idx) => {
+    let v = row[matchCol];
+    if(col && col.type === 'linkPerson' && v !== undefined && v !== ''){
+      const regData = lsGet('regData', []);
+      const i = parseInt(v);
+      v = (!isNaN(i) && regData[i]) ? regData[i].nickname : v;
+    }
+    if(String(v || '') === matchVal) matched.push(idx);
+  });
+  return matched;
+}
+
+function previewBatchEdit(){
+  const preview = document.getElementById('batchEditPreview');
+  if(!preview) return;
+  const matched = getBatchEditMatchedRows();
+  const updateCol = document.getElementById('batchEditUpdateCol').value;
+  const newVal = document.getElementById('batchEditNewVal').value;
+  if(matched.length === 0){ preview.innerHTML = '<span style="color:var(--red)">未找到匹配的行</span>'; return; }
+  if(!updateCol){ preview.innerHTML = '<span style="color:var(--red)">请选择修改列</span>'; return; }
+  const tableId = window._batchEditTableId;
+  const def = TABLE_DEFS[tableId];
+  const col = def.columns.find(c => c.key === updateCol);
+  let html = '<div style="padding:10px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px">';
+  html += '<div style="font-weight:600;margin-bottom:6px;color:var(--text-2)">将修改 ' + matched.length + ' 行的「' + (col ? col.label : updateCol) + '」为「' + (newVal || '(空)') + '」：</div>';
+  const data = lsGet(def.storageKey, []);
+  matched.slice(0, 10).forEach(idx => {
+    const row = data[idx];
+    const desc = row.nickname || row.person || row.product || row.productCode || ('第' + (idx+1) + '行');
+    html += '<div style="color:var(--text-3);font-size:11.5px;padding:2px 0">· ' + desc + '：' + (row[updateCol] || '(空)') + ' → <span style="color:var(--green)">' + (newVal || '(空)') + '</span></div>';
+  });
+  if(matched.length > 10) html += '<div style="color:var(--text-4);font-size:11px">... 还有 ' + (matched.length - 10) + ' 行</div>';
+  html += '</div>';
+  preview.innerHTML = html;
+}
+
+function doBatchEdit(){
+  const matched = getBatchEditMatchedRows();
+  const updateCol = document.getElementById('batchEditUpdateCol').value;
+  const newVal = document.getElementById('batchEditNewVal').value;
+  if(matched.length === 0){ toast('未找到匹配的行', 'error'); return; }
+  if(!updateCol){ toast('请选择修改列', 'error'); return; }
+  const tableId = window._batchEditTableId;
+  const def = TABLE_DEFS[tableId];
+  const col = def.columns.find(c => c.key === updateCol);
+  window._batchEditData = { matched, updateCol, newVal };
+  openModal('⚠️ 确认批量修改',
+    '<p style="color:var(--text-2);font-size:13px">即将修改 <strong>' + matched.length + '</strong> 行的「' + (col ? col.label : updateCol) + '」为「' + (newVal || '(空)') + '」</p><p style="color:var(--text-3);font-size:12px;margin-top:6px">此操作不可撤销，确认继续？</p>',
+    '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-green" onclick="confirmBatchEdit()">确认</button>'
+  );
+}
+
+function confirmBatchEdit(){
+  const tableId = window._batchEditTableId;
+  const def = TABLE_DEFS[tableId];
+  const d = window._batchEditData;
+  if(!def || !d) return;
+  const data = lsGet(def.storageKey, []);
+  let count = 0;
+  d.matched.forEach(idx => {
+    if(data[idx]){
+      data[idx][d.updateCol] = d.newVal;
+      count++;
+    }
+  });
+  lsSet(def.storageKey, data);
+  renderTable(tableId);
+  updateStats();
+  closeModal();
+  debouncePush();
+  addLog('edit', tableId, '批量修改' + count + '行「' + d.updateCol + '」为「' + d.newVal + '」');
+  toast('✅ 已修改 ' + count + ' 行');
 }
 
 // ─────────────────────────────────────────────
