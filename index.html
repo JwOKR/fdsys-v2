@@ -1988,15 +1988,9 @@ function doBulkImport(){
     const exists = pubData.some(p => p.productCode === code && p.date === today);
     if(exists) return;
     pubData.push({
+      ...TABLE_DEFS.wfPubTable.empty,
       date: today,
-      product: '',
-      productCode: code,
-      taoCode: '',
-      price: '',
-      commission: '',
-      bonus: '',
-      limit: '',
-      status: '未开始'
+      productCode: code
     });
     added++;
   });
