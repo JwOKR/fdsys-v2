@@ -2078,6 +2078,9 @@ function doBatchPaste(){
   const selCols = getSelectedBatchCols();
   if(selCols.length === 0){ toast('请至少勾选一列', 'error'); return; }
   const colNames = selCols.map(c => c.label).join('、');
+  // Save data before opening confirm modal (modal content will be replaced)
+  window._batchPasteLines = lines;
+  window._batchPasteSelCols = selCols;
   // Confirm
   openModal('⚠️ 确认批量粘贴',
     '<p style="color:var(--text-2);font-size:13px">即将向 <strong>' + TABLE_LABELS[tableId] + '</strong> 新增 <strong>' + lines.length + '</strong> 条记录。</p><p style="color:var(--text-3);font-size:12px;margin-top:6px">填充列：' + colNames + '</p><p style="color:var(--text-3);font-size:12px;margin-top:4px">此操作不可撤销，确认继续？</p>',
@@ -2088,10 +2091,9 @@ function doBatchPaste(){
 function confirmBatchPaste(){
   const tableId = window._batchPasteTableId;
   const def = TABLE_DEFS[tableId];
-  const textarea = document.getElementById('batchPasteData');
-  if(!textarea || !def) return;
-  const lines = textarea.value.trim().split('\n').filter(l => l.trim());
-  const selCols = getSelectedBatchCols();
+  if(!def) return;
+  const lines = window._batchPasteLines || [];
+  const selCols = window._batchPasteSelCols || [];
   const data = lsGet(def.storageKey, []);
   let added = 0;
   lines.forEach(line => {
