@@ -1506,12 +1506,15 @@ function renderTable(tableId){
               saveCell(tableId, ri, 'product', pub.product || '');
               saveCell(tableId, ri, 'productCode', pub.productCode || '');
               saveCell(tableId, ri, 'basePay', pub.commission || '');
-              saveCell(tableId, ri, 'bonusPay', pub.bonus || '');
+              // Auto-calc totalPay = paid + basePay
+              const curPaid = parseFloat(data[ri].paid) || 0;
+              const curBase = parseFloat(pub.commission) || 0;
+              if(curPaid + curBase > 0) saveCell(tableId, ri, 'totalPay', String(curPaid + curBase));
               tr.querySelectorAll('td[data-key]').forEach(cell => {
                 if(cell.dataset.key === 'product') cell.textContent = pub.product || '';
                 if(cell.dataset.key === 'productCode') cell.textContent = pub.productCode || '';
                 if(cell.dataset.key === 'basePay') cell.textContent = pub.commission || '';
-                if(cell.dataset.key === 'bonusPay') cell.textContent = pub.bonus || '';
+                if(cell.dataset.key === 'totalPay') cell.textContent = data[ri].totalPay || '';
               });
               toast('✅ 已关联任务：' + selectedPeriod);
             }
@@ -1605,6 +1608,18 @@ function saveCell(tableId, rowIdx, key, value){
     // Auto-sync hooks
     if(tableId === 'regTable' && key === 'nickname'){
       syncIntervalFromReg(value);
+    }
+    // Auto-calc totalPay when paid or basePay changes
+    if(tableId === 'wfDetailTable' && (key === 'paid' || key === 'basePay')){
+      const paid = parseFloat(data[rowIdx].paid) || 0;
+      const base = parseFloat(data[rowIdx].basePay) || 0;
+      const total = paid + base;
+      if(total > 0){
+        data[rowIdx].totalPay = String(total);
+        lsSet(def.storageKey, data);
+        const totalCell = document.querySelector('#wfDetailTable td[data-row="'+rowIdx+'"][data-key="totalPay"]');
+        if(totalCell) totalCell.textContent = String(total);
+      }
     }
     if(tableId === 'wfDetailTable' && (key === 'nickname' || key === 'date')){
       const row = data[rowIdx];
@@ -1717,7 +1732,7 @@ function confirmQuickAssign(pubIdx){
       product: pub.product || '',
       productCode: pub.productCode || '',
       basePay: pub.commission || '',
-      bonusPay: pub.bonus || ''
+      bonusPay: ''
     };
     const detailData = lsGet('wfDetailData', []);
     detailData.push(newRow);
@@ -1759,7 +1774,7 @@ function forceQuickAssign(pubIdx, regIdx){
     product: pub.product || '',
     productCode: pub.productCode || '',
     basePay: pub.commission || '',
-    bonusPay: pub.bonus || ''
+    bonusPay: ''
   };
   const detailData = lsGet('wfDetailData', []);
   detailData.push(newRow);
