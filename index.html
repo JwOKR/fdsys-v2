@@ -2019,6 +2019,11 @@ function showBatchPaste(tableId){
   openModal('📋 批量粘贴 — ' + TABLE_LABELS[tableId], html,
     '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-accent" onclick="previewBatchPaste()">预览</button><button class="btn btn-green" onclick="doBatchPaste()">确认粘贴</button>'
   );
+  // Focus textarea after modal opens
+  setTimeout(function(){
+    var ta = document.getElementById('batchPasteData');
+    if(ta) ta.focus();
+  }, 100);
 }
 
 function getSelectedBatchCols(){
