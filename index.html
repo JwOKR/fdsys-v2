@@ -461,6 +461,7 @@
       <div class="sub-pn on" id="sp0">
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
           <button class="btn btn-sm" onclick="clearFilters('regTable')" title="清除所有筛选条件">🔍 清除筛选</button>
+          <button class="btn btn-sm" onclick="showBatchPaste('regTable')" title="从Excel批量粘贴数据">📋 批量粘贴</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('regTable')">+ 新增接单人</button>
         </div>
         <div class="cd-b">
@@ -476,6 +477,7 @@
       <div class="sub-pn" id="sp1">
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
           <button class="btn btn-sm" onclick="clearFilters('wfPubTable')" title="清除所有筛选条件">🔍 清除筛选</button>
+          <button class="btn btn-sm" onclick="showBatchPaste('wfPubTable')" title="从Excel批量粘贴数据">📋 批量粘贴</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('wfPubTable')">+ 新增任务</button>
           <button class="btn btn-sm" onclick="showBulkImport()">📋 批量新增</button>
         </div>
@@ -491,6 +493,7 @@
       <div class="sub-pn" id="sp2">
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
           <button class="btn btn-sm" onclick="clearFilters('wfDetailTable')" title="清除所有筛选条件">🔍 清除筛选</button>
+          <button class="btn btn-sm" onclick="showBatchPaste('wfDetailTable')" title="从Excel批量粘贴数据">📋 批量粘贴</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('wfDetailTable')">+ 新增接单</button>
         </div>
         <div class="cd-b">
@@ -506,6 +509,7 @@
       <div class="sub-pn" id="sp3">
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
           <button class="btn btn-sm" onclick="clearFilters('wfIntervalTable')" title="清除所有筛选条件">🔍 清除筛选</button>
+          <button class="btn btn-sm" onclick="showBatchPaste('wfIntervalTable')" title="从Excel批量粘贴数据">📋 批量粘贴</button>
           <button class="btn btn-accent btn-sm" onclick="rebuildIntervalTable()">🔄 从明细表同步</button>
         </div>
         <div class="cd-b">
@@ -846,6 +850,7 @@
         <div class="cd-hl"><div class="cd-dot" style="background:var(--purple)"></div><h3>异常登记表</h3><span class="sub">· 逐单记录异常详情</span></div>
         <div class="cd-hr">
           <button class="btn btn-sm" onclick="clearFilters('excTable')" title="清除所有筛选条件">🔍 清除筛选</button>
+          <button class="btn btn-sm" onclick="showBatchPaste('excTable')" title="从Excel批量粘贴数据">📋 批量粘贴</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('excTable')">+ 新增记录</button>
         </div>
       </div>
@@ -1981,6 +1986,108 @@ function doBulkImport(){
   debouncePush();
   addLog('bulk', 'wfPubTable', '批量新增' + added + '个任务（' + codes.join(', ') + '）');
   toast('✅ 已导入 ' + added + ' 个任务' + (added < codes.length ? '（跳过 ' + (codes.length - added) + ' 个重复）' : ''));
+}
+
+// ─────────────────────────────────────────────
+// Batch paste from Excel (tab-separated)
+// ─────────────────────────────────────────────
+function showBatchPaste(tableId){
+  const def = TABLE_DEFS[tableId];
+  if(!def) return;
+  // Editable columns only (skip auto, computed, quickAssign, linkPerson, linkPeriod)
+  const editableCols = def.columns.filter(c =>
+    c.type === 'text' || c.type === 'number' || c.type === 'date' || c.type === 'select' || c.type === 'status'
+  );
+  const colLabels = editableCols.map(c => c.label).join('、');
+  const html = `
+    <div style="margin-bottom:14px">
+      <p style="color:var(--text-2);font-size:13px;margin-bottom:6px">从 Excel 复制数据后粘贴到下方（每行一条记录，列之间用 <strong>Tab</strong> 分隔）</p>
+      <p style="color:var(--text-4);font-size:11.5px;margin-bottom:10px">可填充列：${colLabels}</p>
+      <textarea id="batchPasteData" rows="10" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:var(--mono);font-size:12px;resize:vertical;tab-size:4" placeholder="粘贴 Excel 数据到这里...\n示例（Tab 分隔）：\n张三\t小三\t13800000000\t3心\t否\t650\t2\t北京"></textarea>
+    </div>
+    <div id="batchPastePreview" style="color:var(--text-3);font-size:12px"></div>
+  `;
+  window._batchPasteTableId = tableId;
+  openModal('📋 批量粘贴 — ' + TABLE_LABELS[tableId], html,
+    '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-accent" onclick="previewBatchPaste()">预览</button><button class="btn btn-green" onclick="doBatchPaste()">确认粘贴</button>'
+  );
+}
+
+function previewBatchPaste(){
+  const tableId = window._batchPasteTableId;
+  const def = TABLE_DEFS[tableId];
+  const textarea = document.getElementById('batchPasteData');
+  const preview = document.getElementById('batchPastePreview');
+  if(!textarea || !preview || !def) return;
+  const lines = textarea.value.trim().split('\n').filter(l => l.trim());
+  if(lines.length === 0){ preview.innerHTML = '<span style="color:var(--red)">请粘贴数据</span>'; return; }
+  const editableCols = def.columns.filter(c =>
+    c.type === 'text' || c.type === 'number' || c.type === 'date' || c.type === 'select' || c.type === 'status'
+  );
+  let html = '<div style="margin-top:8px;padding:10px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;max-height:200px;overflow:auto">';
+  html += '<div style="font-weight:600;margin-bottom:6px;color:var(--text-2)">预览（' + lines.length + ' 行）：</div>';
+  html += '<table style="font-size:11px;width:100%;border-collapse:collapse"><thead><tr>';
+  editableCols.forEach(c => { html += '<th style="padding:3px 6px;border-bottom:1px solid var(--border);text-align:left;color:var(--text-3)">' + c.label + '</th>'; });
+  html += '</tr></thead><tbody>';
+  lines.forEach((line, i) => {
+    const cells = line.split('\t');
+    html += '<tr>';
+    editableCols.forEach((c, j) => {
+      const val = cells[j] || '';
+      html += '<td style="padding:3px 6px;border-bottom:1px solid rgba(42,48,80,.3);color:var(--text-2)">' + (val || '<span style="color:var(--text-4)">-</span>') + '</td>';
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  preview.innerHTML = html;
+}
+
+function doBatchPaste(){
+  const tableId = window._batchPasteTableId;
+  const def = TABLE_DEFS[tableId];
+  const textarea = document.getElementById('batchPasteData');
+  if(!textarea || !def) return;
+  const lines = textarea.value.trim().split('\n').filter(l => l.trim());
+  if(lines.length === 0){ toast('请粘贴数据', 'error'); return; }
+  const editableCols = def.columns.filter(c =>
+    c.type === 'text' || c.type === 'number' || c.type === 'date' || c.type === 'select' || c.type === 'status'
+  );
+  // Confirm
+  openModal('⚠️ 确认批量粘贴',
+    '<p style="color:var(--text-2);font-size:13px">即将向 <strong>' + TABLE_LABELS[tableId] + '</strong> 新增 <strong>' + lines.length + '</strong> 条记录。</p><p style="color:var(--text-3);font-size:12px;margin-top:6px">此操作不可撤销，确认继续？</p>',
+    '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-green" onclick="confirmBatchPaste()">确认</button>'
+  );
+}
+
+function confirmBatchPaste(){
+  const tableId = window._batchPasteTableId;
+  const def = TABLE_DEFS[tableId];
+  const textarea = document.getElementById('batchPasteData');
+  if(!textarea || !def) return;
+  const lines = textarea.value.trim().split('\n').filter(l => l.trim());
+  const editableCols = def.columns.filter(c =>
+    c.type === 'text' || c.type === 'number' || c.type === 'date' || c.type === 'select' || c.type === 'status'
+  );
+  const data = lsGet(def.storageKey, []);
+  let added = 0;
+  lines.forEach(line => {
+    const cells = line.split('\t');
+    const newRow = {...def.empty};
+    editableCols.forEach((col, j) => {
+      if(cells[j] !== undefined && cells[j].trim() !== ''){
+        newRow[col.key] = cells[j].trim();
+      }
+    });
+    data.push(newRow);
+    added++;
+  });
+  lsSet(def.storageKey, data);
+  renderTable(tableId);
+  updateStats();
+  closeModal();
+  debouncePush();
+  addLog('bulk', tableId, '批量粘贴' + added + '条记录');
+  toast('✅ 已粘贴 ' + added + ' 条记录');
 }
 
 // ─────────────────────────────────────────────
