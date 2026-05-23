@@ -1632,7 +1632,7 @@ function saveCell(tableId, rowIdx, key, value){
 function addRow(tableId){
   const def = TABLE_DEFS[tableId];
   const data = lsGet(def.storageKey, []);
-  data.push({...def.empty});
+  data.unshift({...def.empty});
   lsSet(def.storageKey, data);
   renderTable(tableId);
   updateStats();
@@ -1736,7 +1736,7 @@ function confirmQuickAssign(pubIdx){
       bonusPay: ''
     };
     const detailData = lsGet('wfDetailData', []);
-    detailData.push(newRow);
+    detailData.unshift(newRow);
     lsSet('wfDetailData', detailData);
     // Sync interval
     syncIntervalFromDetail(reg.nickname || '', today, taskName);
@@ -1778,7 +1778,7 @@ function forceQuickAssign(pubIdx, regIdx){
     bonusPay: ''
   };
   const detailData = lsGet('wfDetailData', []);
-  detailData.push(newRow);
+  detailData.unshift(newRow);
   lsSet('wfDetailData', detailData);
   syncIntervalFromDetail(reg.nickname || '', today, taskName);
   closeModal();
@@ -1987,7 +1987,7 @@ function doBulkImport(){
     // Check duplicate
     const exists = pubData.some(p => p.productCode === code && p.date === today);
     if(exists) return;
-    pubData.push({
+    pubData.unshift({
       ...TABLE_DEFS.wfPubTable.empty,
       date: today,
       productCode: code
@@ -2119,7 +2119,7 @@ function confirmBatchPaste(){
         newRow[col.key] = cells[j].trim();
       }
     });
-    data.push(newRow);
+    data.unshift(newRow);
     added++;
   });
   lsSet(def.storageKey, data);
