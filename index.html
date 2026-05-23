@@ -1619,6 +1619,17 @@ function clearFilters(tableId){
 function saveCell(tableId, rowIdx, key, value){
   const def = TABLE_DEFS[tableId];
   const data = lsGet(def.storageKey, []);
+  // Check duplicate orderId
+  if(tableId === 'wfDetailTable' && key === 'orderId' && value.trim()){
+    const duplicate = data.some((r, i) => i !== rowIdx && r.orderId === value.trim());
+    if(duplicate){
+      toast('⚠️ 订单编号重复：' + value.trim(), 'error');
+      // Revert to old value
+      const cell = document.querySelector('#wfDetailTable td[data-row="'+rowIdx+'"][data-key="orderId"]');
+      if(cell) cell.textContent = data[rowIdx].orderId || '';
+      return;
+    }
+  }
   if(data[rowIdx]){
     const oldVal = data[rowIdx][key];
     data[rowIdx][key] = value;
