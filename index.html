@@ -461,6 +461,7 @@
       <div class="sub-pn on" id="sp0">
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
           <button class="btn btn-sm" onclick="clearFilters('regTable')" title="清除所有筛选条件">🔍 清除筛选</button>
+          <button class="btn btn-sm" onclick="showExportDialog('regTable')" title="导出数据">📥 导出</button>
           <button class="btn btn-sm" onclick="showBatchPaste('regTable')" title="从Excel批量粘贴数据">📋 批量粘贴</button>
           <button class="btn btn-sm" onclick="showBatchEdit('regTable')" title="批量修改已有数据">✏️ 批量修改</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('regTable')">+ 新增接单人</button>
@@ -478,6 +479,7 @@
       <div class="sub-pn" id="sp1">
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
           <button class="btn btn-sm" onclick="clearFilters('wfPubTable')" title="清除所有筛选条件">🔍 清除筛选</button>
+          <button class="btn btn-sm" onclick="showExportDialog('wfPubTable')" title="导出数据">📥 导出</button>
           <button class="btn btn-sm" onclick="showBatchPaste('wfPubTable')" title="从Excel批量粘贴数据">📋 批量粘贴</button>
           <button class="btn btn-sm" onclick="showBatchEdit('wfPubTable')" title="批量修改已有数据">✏️ 批量修改</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('wfPubTable')">+ 新增任务</button>
@@ -495,6 +497,7 @@
       <div class="sub-pn" id="sp2">
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
           <button class="btn btn-sm" onclick="clearFilters('wfDetailTable')" title="清除所有筛选条件">🔍 清除筛选</button>
+          <button class="btn btn-sm" onclick="showExportDialog('wfDetailTable')" title="导出数据">📥 导出</button>
           <button class="btn btn-sm" onclick="showBatchPaste('wfDetailTable')" title="从Excel批量粘贴数据">📋 批量粘贴</button>
           <button class="btn btn-sm" onclick="showBatchEdit('wfDetailTable')" title="批量修改已有数据">✏️ 批量修改</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('wfDetailTable')">+ 新增接单</button>
@@ -512,6 +515,7 @@
       <div class="sub-pn" id="sp3">
         <div style="padding:12px 20px;display:flex;justify-content:flex-end;gap:8px">
           <button class="btn btn-sm" onclick="clearFilters('wfIntervalTable')" title="清除所有筛选条件">🔍 清除筛选</button>
+          <button class="btn btn-sm" onclick="showExportDialog('wfIntervalTable')" title="导出数据">📥 导出</button>
           <button class="btn btn-sm" onclick="showBatchPaste('wfIntervalTable')" title="从Excel批量粘贴数据">📋 批量粘贴</button>
           <button class="btn btn-sm" onclick="showBatchEdit('wfIntervalTable')" title="批量修改已有数据">✏️ 批量修改</button>
           <button class="btn btn-accent btn-sm" onclick="rebuildIntervalTable()">🔄 从明细表同步</button>
@@ -854,6 +858,7 @@
         <div class="cd-hl"><div class="cd-dot" style="background:var(--purple)"></div><h3>异常登记表</h3><span class="sub">· 逐单记录异常详情</span></div>
         <div class="cd-hr">
           <button class="btn btn-sm" onclick="clearFilters('excTable')" title="清除所有筛选条件">🔍 清除筛选</button>
+          <button class="btn btn-sm" onclick="showExportDialog('excTable')" title="导出数据">📥 导出</button>
           <button class="btn btn-sm" onclick="showBatchPaste('excTable')" title="从Excel批量粘贴数据">📋 批量粘贴</button>
           <button class="btn btn-sm" onclick="showBatchEdit('excTable')" title="批量修改已有数据">✏️ 批量修改</button>
           <button class="btn btn-accent btn-sm" onclick="addRow('excTable')">+ 新增记录</button>
@@ -2280,7 +2285,128 @@ function confirmBatchEdit(){
 }
 
 // ─────────────────────────────────────────────
-// Export / Import
+// Per-table export with column selection
+// ─────────────────────────────────────────────
+function showExportDialog(tableId){
+  const def = TABLE_DEFS[tableId];
+  if(!def) return;
+  // All exportable columns (skip auto and quickAssign)
+  const expCols = def.columns.filter(c => c.type !== 'auto' && c.type !== 'quickAssign');
+  let checks = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">';
+  checks += '<label style="display:flex;align-items:center;gap:4px;padding:4px 10px;background:var(--accent-glow);border:1px solid var(--accent);border-radius:6px;font-size:11.5px;cursor:pointer;font-weight:600"><input type="checkbox" id="exportSelectAll" checked onchange="toggleExportCols(this)" style="accent-color:var(--accent)"> 全选</label>';
+  expCols.forEach(c => {
+    checks += '<label style="display:flex;align-items:center;gap:4px;padding:4px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;font-size:11.5px;cursor:pointer;user-select:none">';
+    checks += '<input type="checkbox" class="export-col-cb" data-key="' + c.key + '" checked style="accent-color:var(--accent)">';
+    checks += c.label + '</label>';
+  });
+  checks += '</div>';
+  const data = lsGet(def.storageKey, []);
+  const html = `
+    <div style="margin-bottom:14px">
+      <p style="color:var(--text-2);font-size:13px;margin-bottom:8px">当前「${TABLE_LABELS[tableId]}」共 <strong>${data.length}</strong> 条记录</p>
+      <p style="color:var(--text-4);font-size:11.5px;margin-bottom:8px">勾选要导出的列：</p>
+      ${checks}
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <label style="color:var(--text-3);font-size:12px;display:flex;align-items:center;gap:4px">
+          <input type="radio" name="exportFmt" value="xlsx" checked style="accent-color:var(--accent)"> Excel (.xlsx)
+        </label>
+        <label style="color:var(--text-3);font-size:12px;display:flex;align-items:center;gap:4px">
+          <input type="radio" name="exportFmt" value="csv" style="accent-color:var(--accent)"> CSV (.csv)
+        </label>
+      </div>
+    </div>
+  `;
+  window._exportTableId = tableId;
+  openModal('📥 导出 — ' + TABLE_LABELS[tableId], html,
+    '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-accent" onclick="doExport()">导出</button>'
+  );
+}
+
+function toggleExportCols(master){
+  document.querySelectorAll('.export-col-cb').forEach(cb => { cb.checked = master.checked; });
+}
+
+function doExport(){
+  const tableId = window._exportTableId;
+  const def = TABLE_DEFS[tableId];
+  if(!def) return;
+  const selKeys = [];
+  document.querySelectorAll('.export-col-cb').forEach(cb => { if(cb.checked) selKeys.push(cb.dataset.key); });
+  if(selKeys.length === 0){ toast('请至少选择一列', 'error'); return; }
+  const data = lsGet(def.storageKey, []);
+  // Resolve linked columns
+  const regData = lsGet('regData', []);
+  const pubData = lsGet('wfPubData', []);
+  const rows = data.map(row => {
+    const r = {};
+    selKeys.forEach(key => {
+      const col = def.columns.find(c => c.key === key);
+      let val = row[key] || '';
+      if(col){
+        if(col.type === 'linkPerson'){
+          const idx = parseInt(row.linkPerson);
+          val = (!isNaN(idx) && regData[idx]) ? (regData[idx].nickname || '') : '';
+        } else if(col.type === 'linkPeriod'){
+          val = row.period || '';
+        } else if(col.type === 'computed-taskname'){
+          const pub = pubData.find(p => computeTaskName(p) === row.period);
+          val = computeTaskName(pub || row);
+        } else if(col.type === 'computed-joined'){
+          val = computeJoined(row);
+        } else if(col.type === 'computed-remain'){
+          val = computeRemain(row);
+        } else if(col.type === 'computed-status'){
+          val = computeTaskStatus(row);
+        } else if(col.type === 'computed-canjoin'){
+          val = computeCanJoin(row.lastDate) ? '可接' : '未满';
+        } else if(col.type === 'computed-interval'){
+          val = computeInterval(row.lastDate);
+        } else if(col.type === 'computed-next'){
+          val = computeNextDate(row.lastDate);
+        }
+      }
+      r[col ? col.label : key] = val;
+    });
+    return r;
+  });
+  const fmt = document.querySelector('input[name="exportFmt"]:checked')?.value || 'xlsx';
+  const filename = TABLE_LABELS[tableId] + '_' + new Date().toISOString().slice(0,10);
+  if(fmt === 'xlsx'){
+    exportToXlsx(rows, filename);
+  } else {
+    exportToCsv(rows, filename);
+  }
+  closeModal();
+  toast('✅ 已导出 ' + rows.length + ' 条记录');
+}
+
+function exportToXlsx(rows, filename){
+  if(typeof XLSX === 'undefined'){
+    toast('Excel 库加载中，请稍后重试', 'warning');
+    return;
+  }
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+  XLSX.writeFile(wb, filename + '.xlsx');
+}
+
+function exportToCsv(rows, filename){
+  if(rows.length === 0) return;
+  const headers = Object.keys(rows[0]);
+  const csv = [
+    headers.join(','),
+    ...rows.map(r => headers.map(h => '"' + String(r[h] || '').replace(/"/g, '""') + '"').join(','))
+  ].join('\n');
+  const blob = new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename + '.csv';
+  a.click();
+}
+
+// ─────────────────────────────────────────────
+// Export / Import (full backup)
 // ─────────────────────────────────────────────
 function exportData(){
   const all = {};
