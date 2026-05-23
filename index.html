@@ -1353,7 +1353,10 @@ function renderTable(tableId){
           else if(col.type === 'linkPerson'){
             const regData = lsGet('regData', []);
             const idx = parseInt(row.linkPerson);
-            cellVal = (!isNaN(idx) && regData[idx]) ? (regData[idx].nickname || '') : '';
+            // Try index first, then fall back to stored nickname
+            if(!isNaN(idx) && regData[idx]) cellVal = regData[idx].nickname || '';
+            else if(row.nickname) cellVal = row.nickname;
+            else cellVal = '';
           }
           else if(col.type === 'linkPeriod'){
             cellVal = row.period || '';
@@ -1441,7 +1444,10 @@ function renderTable(tableId){
           const o = document.createElement('option');
           o.value = regIdx;
           o.textContent = reg.nickname || ('接单人#' + (regIdx+1));
-          if(row.linkPerson !== undefined && row.linkPerson !== '' && parseInt(row.linkPerson) === regIdx) o.selected = true;
+          // Match by index or by nickname (for backward compatibility)
+          const match = row.linkPerson !== undefined && row.linkPerson !== '' &&
+            (parseInt(row.linkPerson) === regIdx || row.nickname === reg.nickname);
+          if(match) o.selected = true;
           sel.appendChild(o);
         });
         sel.dataset.row = ri;
