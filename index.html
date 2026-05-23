@@ -504,7 +504,7 @@
         </div>
         <div class="cd-b">
           <table id="wfDetailTable">
-            <thead><tr><th style="width:40px">#</th><th>期数</th><th>接单日期</th><th><span style="color:var(--accent)">选择接单人</span></th><th>微信昵称</th><th>微信号</th><th>总返款</th><th>是否已返款</th><th>商品ID</th><th>产品编号</th><th>订单编号</th><th>实付</th><th>快递单号</th><th>签收</th><th>确认收货</th><th>好评</th><th>晒单</th><th>基础返款</th><th>晒单奖</th><th>返款日期</th><th>付款方式</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
+            <thead><tr><th style="width:40px">#</th><th>期数</th><th>接单日期</th><th><span style="color:var(--accent)">选择接单人</span></th><th>微信昵称</th><th>微信号</th><th>总返款</th><th>是否已返款</th><th>商品ID</th><th>产品编号</th><th>订单编号</th><th>订单链接</th><th>实付</th><th>快递单号</th><th>签收</th><th>确认收货</th><th>好评</th><th>晒单</th><th>基础返款</th><th>晒单奖</th><th>返款日期</th><th>付款方式</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -1173,6 +1173,7 @@ var TABLE_DEFS = {
       { key:'product', label:'商品ID', type:'text', readonly:true },
       { key:'productCode', label:'产品编号', type:'text', readonly:true },
       { key:'orderId', label:'订单编号', type:'text' },
+      { key:'orderLink', label:'订单链接', type:'computed-orderlink' },
       { key:'paid', label:'实付', type:'text' },
       { key:'tracking', label:'快递单号', type:'text' },
       { key:'delivery', label:'签收', type:'status', options:['未发货','运输中','已签收'] },
@@ -1565,6 +1566,17 @@ function renderTable(tableId){
         td.textContent = v;
         td.style.fontFamily = 'var(--mono)';
         if(v === '0') td.style.color = 'var(--red)';
+      } else if(col.type === 'computed-orderlink'){
+        if(row.orderId){
+          const a = document.createElement('a');
+          a.href = 'https://qn.taobao.com/home.htm/trade-platform/tp/detail?spm=a21dvs.23580594.0.0.77f9645es0fqTZ&bizOrderId=' + row.orderId;
+          a.target = '_blank';
+          a.textContent = '查看订单';
+          a.style.color = 'var(--accent)';
+          a.style.textDecoration = 'underline';
+          a.style.fontSize = '11px';
+          td.appendChild(a);
+        }
       } else if(col.type === 'computed-status'){
         const s = computeTaskStatus(row);
         td.textContent = s;
