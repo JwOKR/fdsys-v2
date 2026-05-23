@@ -1957,7 +1957,7 @@ function updateStats(){
   const wfDetail = lsGet('wfDetailData', []);
 
   const totalOrders = reg.length + wfDetail.length;
-  const pendingPay = reg.filter(r => r.payStatus === '未结').length + wfDetail.filter(r => !r.payDate).length;
+  const pendingPay = wfDetail.filter(r => !r.payDate).length;
   const excPending = exc.filter(r => r.result === '待处理').length;
 
   document.getElementById('statsBar').innerHTML = `
