@@ -1957,13 +1957,13 @@ function updateStats(){
   const wfDetail = lsGet('wfDetailData', []);
 
   const totalOrders = reg.length + wfDetail.length;
-  const pendingPay = wfDetail.filter(r => !r.payDate).length;
+  const pendingPay = wfDetail.filter(r => r.paidBack !== '已返').length;
   const excPending = exc.filter(r => r.result === '待处理').length;
 
   document.getElementById('statsBar').innerHTML = `
     <div class="st"><div class="st-i" style="background:var(--accent-glow);color:var(--accent)">📋</div><div><div class="st-l">接单人总数</div><div class="st-v" style="color:var(--accent)">${reg.length}</div></div></div>
     <div class="st"><div class="st-i" style="background:var(--green-bg);color:var(--green)">📦</div><div><div class="st-l">福利接单</div><div class="st-v" style="color:var(--green)">${wfDetail.length}</div></div></div>
-    <div class="st"><div class="st-i" style="background:var(--yellow-bg);color:var(--yellow)">⏳</div><div><div class="st-l">待结算佣金</div><div class="st-v" style="color:var(--yellow)">${pendingPay}</div></div></div>
+    <div class="st"><div class="st-i" style="background:var(--yellow-bg);color:var(--yellow)">⏳</div><div><div class="st-l">未返款</div><div class="st-v" style="color:var(--yellow)">${pendingPay}</div></div></div>
     <div class="st"><div class="st-i" style="background:var(--red-bg);color:var(--red)">⚠️</div><div><div class="st-l">待处理异常</div><div class="st-v" style="color:var(--red)">${excPending}</div></div></div>
     <div class="st"><div class="st-i" style="background:var(--purple-bg);color:var(--purple)">🎁</div><div><div class="st-l">福利任务期</div><div class="st-v" style="color:var(--purple)">${wfPub.length}</div></div></div>
   `;
