@@ -467,7 +467,7 @@
         </div>
         <div class="cd-b">
           <table id="regTable">
-            <thead><tr><th style="width:40px">#</th><th>接单人昵称</th><th>微信号</th><th>联系方式</th><th>账号等级</th><th>88VIP</th><th>芝麻信用</th><th>近30天同类目</th><th>所在城市</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
+            <thead><tr><th style="width:40px">#</th><th>接单人昵称</th><th>微信号</th><th>账号等级</th><th>88VIP</th><th>芝麻信用</th><th>近30天同类目</th><th>所在城市</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -501,11 +501,11 @@
         </div>
         <div class="cd-b">
           <table id="wfDetailTable">
-            <thead><tr><th style="width:40px">#</th><th>期数</th><th>接单日期</th><th><span style="color:var(--accent)">选择接单人</span></th><th>微信昵称</th><th>微信号</th><th>联系方式</th><th>总返款</th><th>是否已返款</th><th>商品ID</th><th>产品编号</th><th>下单时间</th><th>订单编号</th><th>实付</th><th>快递单号</th><th>签收</th><th>确认收货</th><th>好评</th><th>晒单</th><th>基础返款</th><th>晒单奖</th><th>返款日期</th><th>付款方式</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
+            <thead><tr><th style="width:40px">#</th><th>期数</th><th>接单日期</th><th><span style="color:var(--accent)">选择接单人</span></th><th>微信昵称</th><th>微信号</th><th>总返款</th><th>是否已返款</th><th>商品ID</th><th>产品编号</th><th>下单时间</th><th>订单编号</th><th>实付</th><th>快递单号</th><th>签收</th><th>确认收货</th><th>好评</th><th>晒单</th><th>基础返款</th><th>晒单奖</th><th>返款日期</th><th>付款方式</th><th>备注</th><th style="width:50px">操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
-        <div class="nt"><span class="nt-ico">🔗</span><span>联动功能：选择「期数」自动关联任务（商品ID、产品编号、基础返款、晒单奖） · 选择「接单人」自动填充（微信昵称、微信号、联系方式）</span></div>
+        <div class="nt"><span class="nt-ico">🔗</span><span>联动功能：选择「期数」自动关联任务（商品ID、产品编号、基础返款、晒单奖） · 选择「接单人」自动填充（微信昵称、微信号）</span></div>
       </div>
 
       <!-- 子面板 3: 接单间隔管理表 -->
@@ -1109,7 +1109,6 @@ var TABLE_DEFS = {
       { key:'idx', label:'#', type:'auto', width:40 },
       { key:'nickname', label:'接单人昵称', type:'text' },
       { key:'wechatName', label:'微信号', type:'text' },
-      { key:'contact', label:'联系方式', type:'text' },
       { key:'level', label:'账号等级', type:'text' },
       { key:'vip88', label:'88VIP', type:'select', options:['否','是'] },
       { key:'zhima', label:'芝麻信用', type:'text' },
@@ -1117,7 +1116,7 @@ var TABLE_DEFS = {
       { key:'city', label:'所在城市', type:'text' },
       { key:'note', label:'备注', type:'text' }
     ],
-    empty: { nickname:'',wechatName:'',contact:'',level:'',vip88:'否',zhima:'',recent30:'',city:'',note:'' }
+    empty: { nickname:'',wechatName:'',level:'',vip88:'否',zhima:'',recent30:'',city:'',note:'' }
   },
   excTable: {
     storageKey: 'excData',
@@ -1163,7 +1162,6 @@ var TABLE_DEFS = {
       { key:'linkPerson', label:'选择接单人', type:'linkPerson' },
       { key:'nickname', label:'微信昵称', type:'text' },
       { key:'wechatName', label:'微信号', type:'text' },
-      { key:'contact', label:'联系方式', type:'text' },
       { key:'totalPay', label:'总返款', type:'text' },
       { key:'paidBack', label:'是否已返款', type:'status', options:['未返','已返'] },
       { key:'product', label:'商品ID', type:'text', readonly:true },
@@ -1182,7 +1180,7 @@ var TABLE_DEFS = {
       { key:'payMethod', label:'付款方式', type:'status', options:['余额','储蓄卡','余额宝','信用卡(违规)','花呗(违规)'] },
       { key:'note', label:'备注', type:'text' }
     ],
-    empty: { period:'',date:'',linkPerson:'',nickname:'',wechatName:'',contact:'',totalPay:'',paidBack:'未返',product:'',productCode:'',orderTime:'',orderId:'',paid:'',tracking:'',delivery:'未发货',confirm:'未确认',review:'未评价',photoReview:'未晒单',basePay:'',bonusPay:'',payDate:'',payMethod:'余额',note:'' }
+    empty: { period:'',date:'',linkPerson:'',nickname:'',wechatName:'',totalPay:'',paidBack:'未返',product:'',productCode:'',orderTime:'',orderId:'',paid:'',tracking:'',delivery:'未发货',confirm:'未确认',review:'未评价',photoReview:'未晒单',basePay:'',bonusPay:'',payDate:'',payMethod:'余额',note:'' }
   },
   wfIntervalTable: {
     storageKey: 'wfIntervalData',
@@ -1456,11 +1454,9 @@ function renderTable(tableId){
             saveCell(tableId, ri, 'linkPerson', this.value);
             saveCell(tableId, ri, 'nickname', reg.nickname || '');
             saveCell(tableId, ri, 'wechatName', reg.wechatName || '');
-            saveCell(tableId, ri, 'contact', reg.contact || '');
             tr.querySelectorAll('td[data-key]').forEach(cell => {
               if(cell.dataset.key === 'nickname') cell.textContent = reg.nickname || '';
               if(cell.dataset.key === 'wechatName') cell.textContent = reg.wechatName || '';
-              if(cell.dataset.key === 'contact') cell.textContent = reg.contact || '';
             });
             const curRow = data[ri];
             syncIntervalFromDetail(reg.nickname || '', curRow.date || '', curRow.period || '');
@@ -1729,7 +1725,6 @@ function confirmQuickAssign(pubIdx){
       linkPerson: String(regIdx),
       nickname: reg.nickname || '',
       wechatName: reg.wechatName || '',
-      contact: reg.contact || '',
       product: pub.product || '',
       productCode: pub.productCode || '',
       basePay: pub.commission || '',
@@ -1771,7 +1766,6 @@ function forceQuickAssign(pubIdx, regIdx){
     linkPerson: String(regIdx),
     nickname: reg.nickname || '',
     wechatName: reg.wechatName || '',
-    contact: reg.contact || '',
     product: pub.product || '',
     productCode: pub.productCode || '',
     basePay: pub.commission || '',
@@ -1799,11 +1793,9 @@ function confirmLinkPerson(ri, regIdx){
   saveCell(p.tableId, ri, 'linkPerson', String(regIdx));
   saveCell(p.tableId, ri, 'nickname', reg.nickname || '');
   saveCell(p.tableId, ri, 'wechatName', reg.wechatName || '');
-  saveCell(p.tableId, ri, 'contact', reg.contact || '');
   p.tr.querySelectorAll('td[data-key]').forEach(cell => {
     if(cell.dataset.key === 'nickname') cell.textContent = reg.nickname || '';
     if(cell.dataset.key === 'wechatName') cell.textContent = reg.wechatName || '';
-    if(cell.dataset.key === 'contact') cell.textContent = reg.contact || '';
   });
   const data = lsGet('wfDetailData', []);
   const curRow = data[ri];
