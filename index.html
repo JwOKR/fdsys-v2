@@ -487,7 +487,7 @@
         </div>
         <div class="cd-b">
           <table id="wfPubTable">
-            <thead><tr><th style="width:40px">#</th><th>任务名</th><th>发布日期</th><th>商品ID</th><th>产品编号</th><th>商品价格</th><th>淘口令</th><th>基础佣金</th><th>晒单奖励</th><th>限接人数</th><th>已接人数</th><th>剩余名额</th><th>状态</th><th>快速接单</th><th style="width:50px">操作</th></tr></thead>
+            <thead><tr><th style="width:40px">#</th><th>任务名</th><th>发布日期</th><th>商品ID</th><th>产品编号</th><th>商品价格</th><th>淘口令</th><th>基础佣金</th><th>晒单奖励</th><th>限接人数</th><th>已接人数</th><th>剩余名额</th><th>接单人</th><th>状态</th><th>快速接单</th><th style="width:50px">操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -1153,6 +1153,7 @@ var TABLE_DEFS = {
       { key:'limit', label:'限接人数', type:'text' },
       { key:'joined', label:'已接人数', type:'computed-joined' },
       { key:'remain', label:'剩余名额', type:'computed-remain' },
+      { key:'persons', label:'接单人', type:'computed-persons' },
       { key:'status', label:'状态', type:'computed-status' },
       { key:'quickAssign', label:'快速接单', type:'quickAssign' }
     ],
@@ -1344,6 +1345,7 @@ function renderTable(tableId){
           if(col.type === 'computed-status') cellVal = computeTaskStatus(row);
           else if(col.type === 'computed-canjoin') cellVal = computeCanJoin(row.lastDate) ? '可接' : '未满';
           else if(col.type === 'computed-joined') cellVal = computeJoined(row);
+          else if(col.type === 'computed-persons') cellVal = computePersonNames(row);
           else if(col.type === 'computed-remain') cellVal = computeRemain(row);
           else if(col.type === 'computed-taskname') cellVal = computeTaskName(row);
           else if(col.type === 'computed-interval') cellVal = computeInterval(row.lastDate);
@@ -1548,6 +1550,10 @@ function renderTable(tableId){
       } else if(col.type === 'computed-joined'){
         td.textContent = computeJoined(row);
         td.style.fontFamily = 'var(--mono)';
+      } else if(col.type === 'computed-persons'){
+        td.textContent = computePersonNames(row);
+        td.style.fontSize = '11px';
+        td.style.color = 'var(--text-2)';
       } else if(col.type === 'computed-remain'){
         const v = computeRemain(row);
         td.textContent = v;
@@ -1918,6 +1924,13 @@ function computeJoined(row){
   if(taskName === '-') return '0';
   const count = details.filter(d => d.period === taskName).length;
   return String(count);
+}
+function computePersonNames(row){
+  const details = lsGet('wfDetailData', []);
+  const taskName = computeTaskName(row);
+  if(taskName === '-') return '';
+  const names = details.filter(d => d.period === taskName).map(d => d.nickname || '').filter(Boolean);
+  return names.join('、');
 }
 function computeRemain(row){
   const limit = parseInt(row.limit) || 0;
