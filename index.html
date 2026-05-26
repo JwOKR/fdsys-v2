@@ -1574,14 +1574,18 @@ function renderTable(tableId){
           value: regIdx,
           text: reg.nickname || ('接单人#' + (regIdx+1))
         }));
-        // Find current selected value
+        // Find current selected value — prefer nickname match over index
         let currentVal = '';
         if(row.linkPerson !== undefined && row.linkPerson !== ''){
-          const parsed = parseInt(row.linkPerson);
-          if(!isNaN(parsed) && regData[parsed]) currentVal = parsed;
-          else {
-            const matchIdx = regData.findIndex(r => r.nickname === row.nickname);
-            if(matchIdx >= 0) currentVal = matchIdx;
+          // First try to match by stored nickname (most reliable)
+          if(row.nickname){
+            const matchIdx = ssOptions.findIndex(o => o.text === row.nickname);
+            if(matchIdx >= 0) currentVal = ssOptions[matchIdx].value;
+          }
+          // Fallback: try index
+          if(currentVal === ''){
+            const parsed = parseInt(row.linkPerson);
+            if(!isNaN(parsed) && regData[parsed]) currentVal = parsed;
           }
         }
         createSearchableSelect(td, ssOptions, currentVal, function(regIdx){
