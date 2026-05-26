@@ -194,6 +194,21 @@
   td .inline-select:hover{border-color:var(--border);background:var(--surface-2)}
   td .inline-select:focus{border-color:var(--accent);outline:0}
   td .inline-select option{background:var(--surface-2);color:var(--text)}
+  /* ── searchable select ── */
+  .ss-wrap{position:relative;display:inline-block;min-width:120px;max-width:100%}
+  .ss-input{background:transparent;border:1px solid transparent;color:inherit;font:inherit;font-size:11.5px;padding:1px 4px;border-radius:4px;width:100%;box-sizing:border-box;outline:none}
+  .ss-input:hover{border-color:var(--border);background:var(--surface-2)}
+  .ss-input:focus{border-color:var(--accent);background:var(--surface-2)}
+  .ss-input::placeholder{color:var(--text-3);font-size:11px}
+  .ss-list{position:absolute;top:100%;left:0;right:0;max-height:200px;overflow-y:auto;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;z-index:1000;margin-top:2px;box-shadow:0 4px 16px rgba(0,0,0,.25);display:none}
+  .ss-list.open{display:block}
+  .ss-item{padding:5px 8px;font-size:12px;color:var(--text);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ss-item:hover,.ss-item.active{background:var(--accent-glow);color:var(--accent)}
+  .ss-empty{padding:8px;font-size:11px;color:var(--text-3);text-align:center}
+  /* searchable select in modal (form) */
+  .form-row .ss-wrap{width:100%}
+  .form-row .ss-input{background:var(--surface);border:1px solid var(--border);font-size:13px;padding:6px 10px;border-radius:8px}
+  .form-row .ss-input:focus{border-color:var(--accent)}
 
   /* ── Filter row ── */
   .filter-row td{padding:4px 6px;background:var(--surface-2);border-bottom:1px solid var(--border)}
@@ -526,7 +541,7 @@
             <tbody></tbody>
           </table>
         </div>
-        <div class="nt"><span class="nt-ico">📅</span><span>自动从「接单明细」推算 · 点击「从明细表同步」刷新 · ≥ 12天可接 · < 12天需等待</span></div>
+        <div class="nt"><span class="nt-ico">📅</span><span>自动从「接单明细」推算 · 点击「从明细表同步」刷新 · ≥ 7天可接 · < 7天需等待 · 首次接单不受限</span></div>
       </div>
     </div>
 
@@ -583,7 +598,7 @@
         <div class="wf-banner-ico">🎁</div>
         <div>
           <h4>福利任务模块</h4>
-          <p>适用于群内福利放单场景：加购收藏→关注店铺→购物车下单→好评晒单，12天接单间隔管理，禁止信用卡/花呗分期</p>
+          <p>适用于群内福利放单场景：加购收藏→关注店铺→购物车下单→好评晒单，7天接单间隔管理，禁止信用卡/花呗分期</p>
         </div>
       </div>
     </div>
@@ -615,7 +630,7 @@
 <span class="ok">第四步</span>：收货后好评，参与晒单可另返3元（找群主要图）
 
 ━━━━━━━━━━━━━━━━━━━━━
-📌 PS：每天群主发出任务数，限人数参与任务，先到先得，间隔12天可再次接任务
+📌 PS：每天群主发出任务数，限人数参与任务，先到先得，间隔7天可再次接任务
 
 ✅ 接单请回复：已接单 + 微信昵称<button class="copy-btn" onclick="copyScript(this)">复制</button></div>
         </div>
@@ -671,7 +686,7 @@
           <thead><tr><th>阶段</th><th>检查项</th><th>标准</th><th>检查方式</th><th>状态</th></tr></thead>
           <tbody>
             <tr><td rowspan="4"><strong style="color:var(--green)">下单前</strong></td><td>付款方式</td><td>余额/储蓄卡/余额宝，<span style="color:var(--red)">非信用卡分期</span></td><td>要求接单人确认</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-1"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
-            <tr><td>接单间隔</td><td>距上次接单 ≥ 12天</td><td>查间隔管理表</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-2"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
+            <tr><td>接单间隔</td><td>距上次接单 ≥ 7天（首次不受限）</td><td>查间隔管理表</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-2"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
             <tr><td>名额检查</td><td>当期剩余名额 > 0</td><td>查发布管理表</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-3"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
             <tr><td>淘口令有效</td><td>复制后正常弹出商品页</td><td>自己先测试</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-pre-4"><option value="pending">待检查</option><option value="pass">✅ 通过</option><option value="fail">❌ 不通过</option></select></td></tr>
             <tr><td rowspan="2"><strong style="color:var(--yellow)">下单后</strong></td><td>订单详情页截图</td><td>订单编号、金额、时间、地址</td><td>人工核验</td><td><select class="inline-select" onchange="saveChecklistState(this)" data-key="wf-post-1"><option value="pending">待提交</option><option value="pass">✅ 已交</option><option value="fail">❌ 不合格</option></select></td></tr>
@@ -715,7 +730,7 @@
         <div class="forbid-grid">
           <div class="forbid-item">🚫 禁止使用信用卡付款</div>
           <div class="forbid-item">🚫 禁止使用花呗分期付款</div>
-          <div class="forbid-item">🚫 禁止12天内重复接单</div>
+          <div class="forbid-item">🚫 禁止7天内重复接单</div>
           <div class="forbid-item">🚫 禁止直接点链接下单（必须购物车）</div>
           <div class="forbid-item">🚫 禁止不加购/不收藏/不关注直接下单</div>
           <div class="forbid-item">🚫 禁止收到货后不确认收货</div>
@@ -1196,7 +1211,7 @@ var TABLE_DEFS = {
       { key:'lastDate', label:'上次接单日期', type:'date' },
       { key:'lastPeriod', label:'上次期数', type:'text' },
       { key:'daysAgo', label:'距今天数', type:'computed-interval' },
-      { key:'intervalReq', label:'间隔要求', type:'computed-static', value:'≥ 12天' },
+      { key:'intervalReq', label:'间隔要求', type:'computed-static', value:'≥ 7天' },
       { key:'nextDate', label:'下次可接日期', type:'computed-next' },
       { key:'canJoin', label:'是否可接', type:'computed-canjoin' }
     ],
@@ -1204,6 +1219,127 @@ var TABLE_DEFS = {
     noDelete: false
   }
 };
+
+// ─────────────────────────────────────────────
+// Searchable Select Component
+// ─────────────────────────────────────────────
+function createSearchableSelect(container, options, selectedValue, onSelect){
+  // options: [{value, text}]
+  // Build DOM
+  const wrap = document.createElement('div');
+  wrap.className = 'ss-wrap';
+  const input = document.createElement('input');
+  input.className = 'ss-input';
+  input.type = 'text';
+  input.placeholder = '搜索接单人...';
+  input.autocomplete = 'off';
+  const list = document.createElement('div');
+  list.className = 'ss-list';
+  wrap.appendChild(input);
+  wrap.appendChild(list);
+  container.appendChild(wrap);
+
+  // State
+  let activeIdx = -1;
+  let filtered = [];
+  let selectedText = '';
+  // Init selected text
+  if(selectedValue !== '' && selectedValue !== undefined){
+    const found = options.find(o => String(o.value) === String(selectedValue));
+    if(found){ selectedText = found.text; input.value = found.text; }
+  }
+  let isOpen = false;
+
+  function renderList(filter){
+    const q = (filter || '').toLowerCase();
+    filtered = q ? options.filter(o => o.text.toLowerCase().includes(q)) : options.slice();
+    list.innerHTML = '';
+    if(filtered.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'ss-empty';
+      empty.textContent = '无匹配结果';
+      list.appendChild(empty);
+    } else {
+      filtered.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'ss-item' + (i === activeIdx ? ' active' : '');
+        div.textContent = opt.text;
+        div.dataset.idx = i;
+        div.addEventListener('mousedown', function(e){
+          e.preventDefault();
+          selectItem(i);
+        });
+        list.appendChild(div);
+      });
+    }
+  }
+
+  function openList(){
+    if(isOpen) return;
+    isOpen = true;
+    activeIdx = -1;
+    renderList(input.value);
+    list.classList.add('open');
+  }
+  function closeList(){
+    isOpen = false;
+    list.classList.remove('restore');
+    list.classList.remove('open');
+  }
+
+  function selectItem(idx){
+    const opt = filtered[idx];
+    if(!opt) return;
+    selectedText = opt.text;
+    input.value = opt.text;
+    closeList();
+    if(onSelect) onSelect(opt.value, opt.text);
+  }
+
+  input.addEventListener('focus', function(){
+    input.select();
+    openList();
+  });
+  input.addEventListener('input', function(){
+    activeIdx = -1;
+    openList();
+    renderList(input.value);
+  });
+  input.addEventListener('keydown', function(e){
+    if(!isOpen){
+      if(e.key === 'ArrowDown' || e.key === 'Enter'){ openList(); e.preventDefault(); }
+      return;
+    }
+    if(e.key === 'ArrowDown'){
+      e.preventDefault();
+      activeIdx = Math.min(activeIdx + 1, filtered.length - 1);
+      renderList(input.value);
+    } else if(e.key === 'ArrowUp'){
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx - 1, 0);
+      renderList(input.value);
+    } else if(e.key === 'Enter'){
+      e.preventDefault();
+      if(activeIdx >= 0) selectItem(activeIdx);
+      else closeList();
+    } else if(e.key === 'Escape'){
+      closeList();
+      input.value = selectedText;
+    }
+  });
+  // Close on outside click
+  document.addEventListener('mousedown', function(e){
+    if(!wrap.contains(e.target)) closeList();
+  });
+
+  return {
+    getValue: function(){ return input.value === selectedText ? (options.find(o => o.text === selectedText) || {}).value : null; },
+    setValue: function(val){
+      const found = options.find(o => String(o.value) === String(val));
+      if(found){ selectedText = found.text; input.value = found.text; }
+    }
+  };
+}
 
 // ─────────────────────────────────────────────
 // Render table from stored data
@@ -1432,39 +1568,34 @@ function renderTable(tableId){
         sel.addEventListener('change', function(){ saveCell(tableId, ri, col.key, this.value); });
         td.appendChild(sel);
       } else if(col.type === 'linkPerson'){
-        const sel = document.createElement('select');
-        sel.className = 'inline-select';
-        sel.style.minWidth = '120px';
-        // Default empty option
-        const defaultOpt = document.createElement('option');
-        defaultOpt.value = ''; defaultOpt.textContent = '-- 选择接单人 --';
-        sel.appendChild(defaultOpt);
         // Populate from registration data
         const regData = lsGet('regData', []);
-        regData.forEach((reg, regIdx) => {
-          const o = document.createElement('option');
-          o.value = regIdx;
-          o.textContent = reg.nickname || ('接单人#' + (regIdx+1));
-          // Match by index or by nickname (for backward compatibility)
-          const match = row.linkPerson !== undefined && row.linkPerson !== '' &&
-            (parseInt(row.linkPerson) === regIdx || row.nickname === reg.nickname);
-          if(match) o.selected = true;
-          sel.appendChild(o);
-        });
-        sel.dataset.row = ri;
-        sel.dataset.key = col.key;
-        sel.addEventListener('change', function(){
-          const regIdx = parseInt(this.value);
+        const ssOptions = regData.map((reg, regIdx) => ({
+          value: regIdx,
+          text: reg.nickname || ('接单人#' + (regIdx+1))
+        }));
+        // Find current selected value
+        let currentVal = '';
+        if(row.linkPerson !== undefined && row.linkPerson !== ''){
+          const parsed = parseInt(row.linkPerson);
+          if(!isNaN(parsed) && regData[parsed]) currentVal = parsed;
+          else {
+            const matchIdx = regData.findIndex(r => r.nickname === row.nickname);
+            if(matchIdx >= 0) currentVal = matchIdx;
+          }
+        }
+        createSearchableSelect(td, ssOptions, currentVal, function(regIdx){
+          regIdx = parseInt(regIdx);
           if(isNaN(regIdx) || !regData[regIdx]) return;
           const reg = regData[regIdx];
           // Check interval requirement
           const intervals = lsGet('wfIntervalData', []);
           const intervalRec = intervals.find(r => r.nickname === reg.nickname);
           const canJoin = intervalRec ? computeCanJoin(intervalRec.lastDate) : true;
-          const days = intervalRec ? daysDiff(intervalRec.lastDate) : 12;
+          const days = intervalRec ? daysDiff(intervalRec.lastDate) : 7;
           const prevValue = row.linkPerson;
           const doFill = () => {
-            saveCell(tableId, ri, 'linkPerson', this.value);
+            saveCell(tableId, ri, 'linkPerson', String(regIdx));
             saveCell(tableId, ri, 'nickname', reg.nickname || '');
             saveCell(tableId, ri, 'wechatName', reg.wechatName || '');
             tr.querySelectorAll('td[data-key]').forEach(cell => {
@@ -1475,9 +1606,9 @@ function renderTable(tableId){
             syncIntervalFromDetail(reg.nickname || '', curRow.date || '', curRow.period || '');
             toast('✅ 已自动填充：' + (reg.nickname||''));
           };
-          if(!canJoin && days < 12){
+          if(!canJoin && days < 7){
             openModal('⚠️ 间隔不足提醒',
-              '<p style="color:var(--text-2);font-size:13px">接单人 <strong>' + reg.nickname + '</strong> 距上次接单仅 <strong>' + days + '</strong> 天，未满 12 天间隔要求。</p><p style="color:var(--text-3);font-size:12px">上次接单日期：' + (intervalRec.lastDate || '无记录') + '<br>需等待：' + (12 - days) + ' 天</p>',
+              '<p style="color:var(--text-2);font-size:13px">接单人 <strong>' + reg.nickname + '</strong> 距上次接单仅 <strong>' + days + '</strong> 天，未满 7 天间隔要求。</p><p style="color:var(--text-3);font-size:12px">上次接单日期：' + (intervalRec.lastDate || '无记录') + '<br>需等待：' + (7 - days) + ' 天</p>',
               '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-red" onclick="confirmLinkPerson('+ri+','+regIdx+')">确认选择</button>'
             );
             // Store pending action
@@ -1486,7 +1617,6 @@ function renderTable(tableId){
             doFill();
           }
         });
-        td.appendChild(sel);
       } else if(col.type === 'linkPeriod'){
         // 期数下拉，从任务发布表拉取
         const sel = document.createElement('select');
@@ -1548,7 +1678,7 @@ function renderTable(tableId){
         const canJoin = computeCanJoin(row.lastDate);
         td.innerHTML = canJoin
           ? '<span class="b b-g"><span class="b-i"></span>✅ 可接</span>'
-          : '<span class="b b-r"><span class="b-i"></span>❌ 未满（差' + (12 - daysDiff(row.lastDate)) + '天）</span>';
+          : '<span class="b b-r"><span class="b-i"></span>❌ 未满（差' + (7 - daysDiff(row.lastDate)) + '天）</span>';
       } else if(col.type === 'computed-taskname'){
         td.textContent = computeTaskName(row);
         td.style.fontFamily = 'var(--mono)';
@@ -1716,26 +1846,33 @@ function showQuickAssign(pubIdx){
   const taskName = computeTaskName(pub);
   const status = computeTaskStatus(pub);
   if(status === '已满员'){ toast('该任务已满员', 'error'); return; }
-  // Build select options
-  let options = '<option value="">-- 选择接单人 --</option>';
-  regData.forEach((reg, idx) => {
-    options += '<option value="' + idx + '">' + (reg.nickname || '接单人#' + (idx+1)) + '</option>';
-  });
   const remain = computeRemain(pub);
   const remainText = remain === '-' ? '不限' : ('剩余 ' + remain + ' 个名额');
+  // Reset selected index
+  window._quickAssignSelectedIdx = -1;
   openModal('📋 快速接单 — ' + taskName,
     '<div style="margin-bottom:12px">' +
       '<p style="color:var(--text-2);font-size:13px;margin-bottom:4px"><strong>商品：</strong>' + (pub.product || '-') + ' · <strong>编号：</strong>' + (pub.productCode || '-') + '</p>' +
       '<p style="color:var(--text-3);font-size:12px">佣金：' + (pub.commission || '-') + ' + 晒单奖：' + (pub.bonus || '-') + ' · ' + remainText + '</p>' +
     '</div>' +
-    '<div class="form-row"><label>选择接单人</label><select class="form-input" id="quickAssignPerson">' + options + '</select></div>',
+    '<div class="form-row"><label>选择接单人</label><div id="quickAssignSearchWrap"></div></div>',
     '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-accent" onclick="confirmQuickAssign(' + pubIdx + ')">确认接单</button>'
   );
+  // Initialize searchable select after modal is rendered
+  const ssOptions = regData.map((reg, idx) => ({
+    value: idx,
+    text: reg.nickname || ('接单人#' + (idx+1))
+  }));
+  const container = document.getElementById('quickAssignSearchWrap');
+  if(container){
+    createSearchableSelect(container, ssOptions, '', function(val){
+      window._quickAssignSelectedIdx = parseInt(val);
+    });
+  }
 }
 function confirmQuickAssign(pubIdx){
-  const sel = document.getElementById('quickAssignPerson');
-  if(!sel || !sel.value){ toast('请选择接单人', 'error'); return; }
-  const regIdx = parseInt(sel.value);
+  const regIdx = window._quickAssignSelectedIdx;
+  if(isNaN(regIdx) || regIdx < 0){ toast('请选择接单人', 'error'); return; }
   const regData = lsGet('regData', []);
   const reg = regData[regIdx];
   if(!reg){ toast('接单人不存在', 'error'); return; }
@@ -1754,7 +1891,7 @@ function confirmQuickAssign(pubIdx){
   const intervals = lsGet('wfIntervalData', []);
   const intervalRec = intervals.find(r => r.nickname === reg.nickname);
   const canJoin = intervalRec ? computeCanJoin(intervalRec.lastDate) : true;
-  const days = intervalRec ? daysDiff(intervalRec.lastDate) : 12;
+  const days = intervalRec ? daysDiff(intervalRec.lastDate) : 7;
   const doCreate = () => {
     const today = new Date().toISOString().split('T')[0];
     const newRow = {
@@ -1781,9 +1918,9 @@ function confirmQuickAssign(pubIdx){
     addLog('quickAssign', 'wfDetailTable', '快速接单：' + (reg.nickname||'') + ' → ' + taskName);
     toast('✅ 已为 ' + (reg.nickname||'') + ' 创建接单明细（' + taskName + '）');
   };
-  if(!canJoin && days < 12){
+  if(!canJoin && days < 7){
     openModal('⚠️ 间隔不足提醒',
-      '<p style="color:var(--text-2);font-size:13px">接单人 <strong>' + reg.nickname + '</strong> 距上次接单仅 <strong>' + days + '</strong> 天，未满 12 天间隔要求。</p><p style="color:var(--text-3);font-size:12px">上次接单日期：' + (intervalRec.lastDate || '无记录') + '<br>需等待：' + (12 - days) + ' 天</p>',
+      '<p style="color:var(--text-2);font-size:13px">接单人 <strong>' + reg.nickname + '</strong> 距上次接单仅 <strong>' + days + '</strong> 天，未满 7 天间隔要求。</p><p style="color:var(--text-3);font-size:12px">上次接单日期：' + (intervalRec.lastDate || '无记录') + '<br>需等待：' + (7 - days) + ' 天</p>',
       '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-red" onclick="forceQuickAssign(' + pubIdx + ',' + regIdx + ')">确认强制接单</button>'
     );
   } else {
@@ -1931,11 +2068,12 @@ function computeNextDate(dateStr){
   if(!dateStr) return '-';
   const d = new Date(dateStr);
   if(isNaN(d)) return '-';
-  d.setDate(d.getDate() + 12);
+  d.setDate(d.getDate() + 7);
   return d.toISOString().split('T')[0];
 }
 function computeCanJoin(dateStr){
-  return daysDiff(dateStr) >= 12;
+  if(!dateStr) return true; // 首次接单不受间隔限制
+  return daysDiff(dateStr) >= 7;
 }
 
 // ─────────────────────────────────────────────
