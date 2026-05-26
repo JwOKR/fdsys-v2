@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>淘宝天猫 · 放单运营管理系统 V2</title>
+<title>淘宝天猫 · 激励管理系统 V2</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -389,7 +389,7 @@
   <div class="hdr">
     <div class="hdr-logo">放</div>
     <div>
-      <h1>淘宝天猫 · 放单运营管理系统</h1>
+      <h1>淘宝天猫 · 激励管理系统</h1>
       <div class="hdr-sub">话术 · 登记 · 检查 · 催收 · 异常 · 福利任务 &mdash; 全模块整合 · 数据可编辑 · 云端永久存储</div>
     </div>
     <div class="hdr-right">
@@ -2760,7 +2760,7 @@ async function createGist(data){
     method: 'POST',
     headers: ghHeaders(),
     body: JSON.stringify({
-      description: '放单运营管理系统 - 数据备份 (自动同步)',
+      description: '激励管理系统 - 数据备份 (自动同步)',
       public: false,
       files: { 'fdsys-data.json': { content: JSON.stringify(data, null, 2) } }
     })
@@ -2947,7 +2947,7 @@ async function saveCloudSetup(){
       // Search for existing gist
       const gistsResp = await fetch(GH_API + '/gists', { headers: { 'Authorization': 'token ' + pat } });
       const gists = await gistsResp.json();
-      const existing = gists.find(g => g.description && g.description.includes('放单运营管理系统'));
+      const existing = gists.find(g => g.description && g.description.includes('激励管理系统'));
       if(existing){
         gistId = existing.id;
         localStorage.setItem(CLOUD_PREFIX + 'gistId', gistId);
@@ -2985,7 +2985,7 @@ function initCloudSync(){
         // Try to find existing gist
         const gistsResp = await fetch(GH_API + '/gists', { headers: { 'Authorization': 'token ' + cloudPat } });
         const gists = await gistsResp.json();
-        const existing = gists.find(g => g.description && g.description.includes('放单运营管理系统'));
+        const existing = gists.find(g => g.description && g.description.includes('激励管理系统'));
         if(existing){
           gistId = existing.id;
           localStorage.setItem(CLOUD_PREFIX + 'gistId', gistId);
